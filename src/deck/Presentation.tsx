@@ -42,16 +42,14 @@ export function Presentation() {
   const section = SECTIONS[pos.s];
   const slide = section.slides[pos.sub];
 
-  // Lecture de l'URL (?s=1.3) au montage
+  // Lecture de l'URL (#1.3) au montage
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("s");
+    const id = decodeURIComponent(window.location.hash.slice(1));
     const f = FLAT.find((x) => x.sl.id === id);
     if (f) setPos({ s: f.s, sub: f.sub });
   }, []);
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("s", slide.id);
-    window.history.replaceState(null, "", url);
+    window.history.replaceState(window.history.state, "", `#${slide.id}`);
     const idx = FLAT.findIndex((x) => x.sl.id === slide.id);
     document.title = `${idx + 1}/${FLAT.length} — ${slide.title}`;
   }, [slide]);

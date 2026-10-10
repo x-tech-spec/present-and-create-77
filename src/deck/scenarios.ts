@@ -50,7 +50,7 @@ export const CHARACTERS: Record<CharId, { name: string; role: string }> = {
   yasmine: { name: "Yasmine", role: "Salariée de production" },
 };
 
-export const SCENARIOS: Record<string, Scenario> = {
+export const SCENARIOS = {
   s1: {
     id: "s1",
     title: "Scénario 1 — « Le lancement »",
@@ -152,7 +152,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     ],
     lesson: "Marketing et RH ne sont pas en silos : chacune nourrit l'autre. Les GENS font le produit, le produit fait la CROISSANCE, la croissance fait les MOYENS des gens.",
   },
-};
+} satisfies Record<string, Scenario>;
 
 export type Frame =
   | { k: "step"; i: number }
