@@ -93,20 +93,20 @@ function ScreenVisual({ v }: { v?: Visual | undefined }) {
       );
     case "payflow":
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {[
             { t: "Employés", s: "", I: Users, c: "bg-silver text-deep" },
             { t: "RH", s: "calcule", I: Calculator, c: "bg-cosmic text-silver" },
             { t: "Comptabilité", s: "vérifie + écrit", I: FileText, c: "bg-paper text-deep" },
             { t: "Banque", s: "paie", I: Landmark, c: "bg-deep text-silver" },
           ].map(({ t, s, I, c }, i) => (
-            <div key={t} className="flex items-center gap-3">
-              <div className={`anim-pop flex w-[150px] flex-col items-center rounded-2xl p-3 ${c}`} style={{ animationDelay: `${i * 0.5}s` }}>
+            <div key={t} className="flex items-center gap-2">
+              <div className={`anim-pop flex w-[140px] flex-col items-center rounded-2xl p-3 ${c}`} style={{ animationDelay: `${i * 0.5}s` }}>
                 <I className="h-10 w-10" />
                 <span className="slide-chrome mt-1 font-bold">{t}</span>
                 {s && <span className="slide-chrome opacity-80">[{s}]</span>}
               </div>
-              {i < 3 && <ArrowRight className="h-8 w-8 shrink-0 text-deep" />}
+              {i < 3 && <ArrowRight className="h-7 w-7 shrink-0 text-deep" />}
             </div>
           ))}
         </div>

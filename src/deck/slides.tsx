@@ -278,7 +278,7 @@ function VirtuousCircle({ step }: { step: number }) {
       <div className="flex flex-col gap-6">
         <div className="card-3d flex flex-col items-center p-10">
           <span className="slide-kicker text-deep/60">Compteur de croissance</span>
-          <span className="text-[150px] font-black leading-none tracking-tighter text-cosmic">+{[0, 5, 12, 20, 26, 30][Math.min(step, 5)]} %</span>
+          <span className="whitespace-nowrap text-[120px] font-black leading-none tracking-tighter text-cosmic">+{[0, 5, 12, 20, 26, 30][Math.min(step, 5)]} %</span>
           <span className="slide-caption text-center">Ventes au 1er trimestre (scénario 4)</span>
         </div>
       </div>
@@ -417,7 +417,7 @@ export const SECTIONS: SectionDef[] = [
       {
         id: "1.3", title: "Acteurs du marketing", steps: 3,
         render: (s) => (
-          <SlideFrame fn="mk" kicker="Partie 1 · Marketing" title="Acteurs et relations avec l'environnement" id="1.3">
+          <SlideFrame fn="mk" kicker="Partie 1 · Marketing" title="Acteurs et environnement" id="1.3">
             <ActorsChart
               step={s}
               center="Marketing (Sofia)"
@@ -477,7 +477,7 @@ export const SECTIONS: SectionDef[] = [
       {
         id: "2.3", title: "Acteurs des RH", steps: 3,
         render: (s) => (
-          <SlideFrame fn="rh" kicker="Partie 2 · Ressources humaines" title="Acteurs et relations avec l'environnement" id="2.3">
+          <SlideFrame fn="rh" kicker="Partie 2 · Ressources humaines" title="Acteurs et environnement" id="2.3">
             <ActorsChart
               step={s}
               center="RH (Amine)"

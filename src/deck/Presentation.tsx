@@ -42,6 +42,18 @@ export function Presentation() {
   const [sound, setSoundState] = useState(false);
   const [fs, setFs] = useState(false);
   const ctrlRef = useRef<SlideCtrl>(null);
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    let t = 0;
+    const wake = () => {
+      setIdle(false);
+      window.clearTimeout(t);
+      t = window.setTimeout(() => setIdle(true), 2500);
+    };
+    wake();
+    window.addEventListener("mousemove", wake);
+    return () => { window.removeEventListener("mousemove", wake); window.clearTimeout(t); };
+  }, []);
 
   const section = SECTIONS[pos.s]!;
   const slide = section.slides[pos.sub]!;
@@ -173,7 +185,7 @@ export function Presentation() {
   const ctx = { goTo: (s: number, sub: number) => goSection(s, sub) };
 
   return (
-    <div className="fixed inset-0 select-none overflow-hidden bg-paper" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className={`fixed inset-0 select-none overflow-hidden bg-paper ${idle ? "cursor-none" : ""}`} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <SvgDefs />
       {view === "content" && (
         <div className="h-full w-full cursor-pointer" onClick={onStageClick}>
@@ -208,7 +220,7 @@ export function Presentation() {
       </div>
 
       {/* Barre d'outils (discrète) */}
-      <div className="no-print absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-deep/85 p-1 text-silver opacity-40 shadow-lg transition-opacity hover:opacity-100">
+      <div className={`no-print absolute bottom-4 right-4 flex items-center gap-1 rounded-full bg-deep/85 p-1 text-silver shadow-lg transition-opacity duration-500 hover:opacity-100 ${idle ? "pointer-events-none opacity-0" : "opacity-70"}`}>
         <ToolBtn label="Précédent" onClick={prev}><ChevronLeft className="h-5 w-5" /></ToolBtn>
         <span className="px-2 text-sm font-semibold tabular-nums">{slide.id} · {idx + 1}/{FLAT.length}</span>
         <ToolBtn label="Suivant" onClick={next}><ChevronRight className="h-5 w-5" /></ToolBtn>
