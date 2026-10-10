@@ -197,8 +197,8 @@ export function ScenarioScene({
   interactive?: boolean;
 }) {
   const accent = sc.fn === "mk" ? "accent-mk" : sc.fn === "rh" ? "accent-rh" : "accent-neutral";
-  const step = frame.k === "step" ? sc.before[frame.i] : frame.k === "after" ? sc.after[frame.i] : null;
-  const cons = frame.k === "cons" ? sc.choices[frame.c] : null;
+  const step = frame.k === "step" ? sc.before[frame.i]! : frame.k === "after" ? sc.after[frame.i]! : null;
+  const cons = frame.k === "cons" ? sc.choices[frame.c]! : null;
   const speakers = new Set<CharId>(step ? step.lines.map((l) => l.who) : cons ? [cons.line.who] : []);
   const sideOf = (who: CharId): "left" | "right" | "center" => (who === sc.left ? "left" : who === sc.right ? "right" : "center");
   const totalSteps = sc.before.length + 1 + sc.after.length + 1;
@@ -209,7 +209,7 @@ export function ScenarioScene({
 
   const choose = (c: number) => {
     if (!interactive) return;
-    const o = sc.choices[c].outcome;
+    const o = sc.choices[c]!.outcome;
     play(o === "success" ? "ding" : "buzz");
     onFrame?.({ k: "cons", c });
   };
@@ -270,7 +270,7 @@ export function ScenarioScene({
 
       {/* Bulles */}
       {step && (
-        <div className="absolute inset-x-[300px] top-[495px] flex gap-6" style={{ justifyContent: step.lines.length > 1 ? "space-between" : sideOf(step.lines[0].who) === "left" ? "flex-start" : sideOf(step.lines[0].who) === "right" ? "flex-end" : "center" }}>
+        <div className="absolute inset-x-[300px] top-[495px] flex gap-6" style={{ justifyContent: step.lines.length > 1 ? "space-between" : sideOf(step.lines[0]!.who) === "left" ? "flex-start" : sideOf(step.lines[0]!.who) === "right" ? "flex-end" : "center" }}>
           {step.lines.map((l, i) => (
             <div key={i} style={{ maxWidth: step.lines.length > 1 ? 640 : 1220, animationDelay: `${i * 0.6}s` }} className="anim-pop">
               <Bubble who={l.who} text={l.text} note={l.note} side={step.lines.length > 1 ? (i === 0 ? "left" : "right") : sideOf(l.who)} />
@@ -361,7 +361,7 @@ export function InteractiveScenario({ sc, ctrlRef }: { sc: Scenario; ctrlRef: Mu
       }
       if (frame.k === "choice") return true; // attendre un choix
       if (frame.k === "cons") {
-        setFrame(sc.choices[frame.c].outcome === "success" ? { k: "after", i: 0 } : { k: "choice" });
+        setFrame(sc.choices[frame.c]!.outcome === "success" ? { k: "after", i: 0 } : { k: "choice" });
         return true;
       }
       if (frame.k === "after") {

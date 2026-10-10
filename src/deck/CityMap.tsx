@@ -19,29 +19,29 @@ const STOPS: P[] = [
 ];
 
 const segLen = (a: P, b: P) => Math.hypot(b.x - a.x, b.y - a.y);
-const CUM = ROUTE.reduce<number[]>((acc, p, i) => (i === 0 ? [0] : [...acc, acc[i - 1] + segLen(ROUTE[i - 1], p)]), []);
+const CUM = ROUTE.reduce<number[]>((acc, p, i) => (i === 0 ? [0] : [...acc, acc[i - 1] + segLen(ROUTE[i - 1]!, p)]), []);
 function lengthOf(p: P) {
   let best = 0, bestD = Infinity;
   for (let i = 1; i < ROUTE.length; i++) {
-    const a = ROUTE[i - 1], b = ROUTE[i];
+    const a = ROUTE[i - 1]!, b = ROUTE[i]!;
     const L = segLen(a, b);
     const t = Math.max(0, Math.min(1, ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / (L * L)));
     const q = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
     const d = segLen(p, q);
-    if (d < bestD) { bestD = d; best = CUM[i - 1] + t * L; }
+    if (d < bestD) { bestD = d; best = CUM[i - 1]! + t * L; }
   }
   return best;
 }
 const STOP_L = STOPS.map(lengthOf);
 function pointAt(l: number): P & { dx: number } {
   for (let i = 1; i < ROUTE.length; i++) {
-    if (l <= CUM[i] || i === ROUTE.length - 1) {
-      const a = ROUTE[i - 1], b = ROUTE[i];
-      const t = Math.max(0, Math.min(1, (l - CUM[i - 1]) / (CUM[i] - CUM[i - 1])));
+    if (l <= CUM[i]! || i === ROUTE.length - 1) {
+      const a = ROUTE[i - 1]!, b = ROUTE[i]!;
+      const t = Math.max(0, Math.min(1, (l - CUM[i - 1]!) / (CUM[i]! - CUM[i - 1]!)));
       return { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y), dx: b.x - a.x };
     }
   }
-  return { ...ROUTE[0], dx: 1 };
+  return { ...ROUTE[0]!, dx: 1 };
 }
 
 const BUILDINGS = [
@@ -164,7 +164,7 @@ export function CityMap({
   onPick?: (i: number) => void;
 }) {
   const start = from ?? active;
-  const [truckL, setTruckL] = useState(STOP_L[Math.max(0, mode === "travel" ? start : active)] ?? STOP_L[0]);
+  const [truckL, setTruckL] = useState(STOP_L[Math.max(0, mode === "travel" ? start : active)]! ?? STOP_L[0]!);
   const [vb, setVb] = useState({ x: 0, y: 0, w: 1920, h: 1080 });
   const [fade, setFade] = useState(1);
   const [flip, setFlip] = useState(false);
@@ -175,7 +175,7 @@ export function CityMap({
     arrived.current = false;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) { onArrive?.(); return; }
-    const L0 = STOP_L[start], L1 = STOP_L[active];
+    const L0 = STOP_L[start]!, L1 = STOP_L[active]!;
     const DRIVE = 1700, ENTER = 650;
     const t0 = performance.now();
     let raf = 0;
@@ -194,7 +194,7 @@ export function CityMap({
         setVb({ x: cx - w / 2, y: cy - h / 2, w, h });
       } else if (t <= DRIVE + ENTER) {
         const k = ease((t - DRIVE) / ENTER);
-        const b = BUILDINGS[active].c;
+        const b = BUILDINGS[active]!.c;
         const p = pointAt(L1);
         const z = 1.55 + 2.6 * k;
         const w = 1920 / z, h = 1080 / z;
@@ -248,7 +248,7 @@ export function CityMap({
       ))}
       {/* bâtiments (ordre de profondeur) */}
       {[3, 1, 2, 0, 5, 4].map((i) => (
-        <Building key={i} b={BUILDINGS[i]} state={active < 0 ? "normal" : i === active ? "active" : "dim"} onPick={mode === "browse" ? onPick : undefined} />
+        <Building key={i} b={BUILDINGS[i]!} state={active < 0 ? "normal" : i === active ? "active" : "dim"} onPick={mode === "browse" ? onPick : undefined} />
       ))}
       {/* employés qui marchent */}
       {ambient &&
@@ -263,8 +263,8 @@ export function CityMap({
         ))}
       {ambient &&
         [1, 2, 0].map((bi, i) => {
-          const b = BUILDINGS[bi].c;
-          const s = STOPS[bi];
+          const b = BUILDINGS[bi]!.c;
+          const s = STOPS[bi]!;
           return (
             <g key={`in${bi}`}>
               <circle r="6" cy="-22" className="fill-deep" />

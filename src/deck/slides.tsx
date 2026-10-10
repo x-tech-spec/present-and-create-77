@@ -132,8 +132,8 @@ function ActorsChart({ center, centerI, internes, externes, step }: { center: st
         <C className="h-16 w-16" />
         <span className="slide-body text-center font-black">{center}</span>
       </div>
-      {internes.map((a, i) => <Node key={a.t} a={a} p={intPos[i]} show={step >= 1} kind="int" />)}
-      {externes.map((a, i) => <Node key={a.t} a={a} p={extPos[i]} show={step >= 2} kind="ext" />)}
+      {internes.map((a, i) => <Node key={a.t} a={a} p={intPos[i]!} show={step >= 1} kind="int" />)}
+      {externes.map((a, i) => <Node key={a.t} a={a} p={extPos[i]!} show={step >= 2} kind="ext" />)}
     </div>
   );
 }

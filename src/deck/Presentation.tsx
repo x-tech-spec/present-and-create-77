@@ -39,8 +39,8 @@ export function Presentation() {
   const [fs, setFs] = useState(false);
   const ctrlRef = useRef<SlideCtrl>(null);
 
-  const section = SECTIONS[pos.s];
-  const slide = section.slides[pos.sub];
+  const section = SECTIONS[pos.s]!;
+  const slide = section.slides[pos.sub]!;
 
   // Lecture de l'URL (#1.3) au montage
   useEffect(() => {
@@ -65,10 +65,10 @@ export function Presentation() {
   );
 
   const arrive = useCallback(() => {
-    const sec = SECTIONS[travel.to];
+    const sec = SECTIONS[travel.to]!;
     const sub = travel.last ? sec.slides.length - 1 : travel.sub;
     setPos({ s: travel.to, sub });
-    setStep(travel.last ? sec.slides[sub].steps - 1 : 0);
+    setStep(travel.last ? sec.slides[sub]!.steps - 1 : 0);
     setDir(travel.to >= travel.from ? "enter-h-next" : "enter-h-prev");
     setView("content");
   }, [travel]);
@@ -86,7 +86,7 @@ export function Presentation() {
       if (pos.sub > 0) {
         const sub = pos.sub - 1;
         setPos({ s: pos.s, sub });
-        setStep(toLast ? section.slides[sub].steps - 1 : 0);
+        setStep(toLast ? section.slides[sub]!.steps - 1 : 0);
         setDir("enter-v-prev");
       } else goSection(pos.s - 1, 0, true);
     },
@@ -141,11 +141,11 @@ export function Presentation() {
 
   // Swipe tactile
   const touch = useRef<{ x: number; y: number } | null>(null);
-  const onTouchStart = (e: React.TouchEvent) => (touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY });
+  const onTouchStart = (e: React.TouchEvent) => (touch.current = { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY });
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!touch.current || view !== "content") return;
-    const dx = e.changedTouches[0].clientX - touch.current.x;
-    const dy = e.changedTouches[0].clientY - touch.current.y;
+    const dx = e.changedTouches[0]!.clientX - touch.current.x;
+    const dy = e.changedTouches[0]!.clientY - touch.current.y;
     touch.current = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
     else if (Math.abs(dy) > 60) (dy < 0 ? nextSub : () => prevSub())();
@@ -184,7 +184,7 @@ export function Presentation() {
           />
           <div className="pointer-events-none absolute inset-x-0 top-6 flex justify-center">
             <div className="rounded-full bg-deep px-6 py-3 text-lg font-bold text-silver shadow-lg">
-              {view === "travel" ? `En route vers : ${SECTIONS[travel.to].title}` : "La ville-entreprise — cliquez sur un bâtiment (Échap pour revenir)"}
+              {view === "travel" ? `En route vers : ${SECTIONS[travel.to]!.title}` : "La ville-entreprise — cliquez sur un bâtiment (Échap pour revenir)"}
             </div>
           </div>
         </div>
