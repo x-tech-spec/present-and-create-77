@@ -1,24 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Presentation } from "@/deck/Presentation";
+import { PrintDeck } from "@/deck/PrintDeck";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    "print-pdf": "print-pdf" in search ? true : undefined,
+    s: typeof search.s === "string" ? search.s : typeof search.s === "number" ? String(search.s) : undefined,
+  }),
+  head: () => ({
+    meta: [
+      { title: "Marketing & RH — Lina Cosmétiques | Exposés 4.2 & 4.3" },
+      { name: "description", content: "Présentation interactive : les fonctions Marketing et Ressources humaines de l'entreprise, racontées avec Lina Cosmétiques." },
+      { property: "og:title", content: "Marketing & RH — Lina Cosmétiques" },
+      { property: "og:description", content: "Présentation interactive des fonctions Marketing et RH : ville-entreprise, camion-roadmap et scénarios à choix." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  const search = Route.useSearch();
+  return search["print-pdf"] ? <PrintDeck /> : <Presentation />;
 }
