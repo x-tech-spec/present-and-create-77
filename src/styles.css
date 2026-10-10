@@ -238,6 +238,7 @@
 @media print {
   html, body { overflow: visible !important; height: auto !important; background: oklch(1 0 0); }
   .no-print { display: none !important; }
-  .print-root { padding: 0 !important; }
+  .print-root { padding: 0 !important; position: static !important; overflow: visible !important; background: oklch(1 0 0) !important; }
+  .print-root > div { gap: 0 !important; }
   .print-page { margin: 0 !important; box-shadow: none !important; }
 }
