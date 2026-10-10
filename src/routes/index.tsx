@@ -1,12 +1,9 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Presentation } from "@/deck/Presentation";
 import { PrintDeck } from "@/deck/PrintDeck";
 
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    "print-pdf": "print-pdf" in search ? true : undefined,
-    s: typeof search.s === "string" ? search.s : typeof search.s === "number" ? String(search.s) : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Marketing & RH — Lina Cosmétiques | Exposés 4.2 & 4.3" },
@@ -21,6 +18,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const search = Route.useSearch();
-  return search["print-pdf"] ? <PrintDeck /> : <Presentation />;
+  const [print, setPrint] = useState<boolean | null>(null);
+  useEffect(() => setPrint(new URLSearchParams(window.location.search).has("print-pdf")), []);
+  if (print === null) return <div className="fixed inset-0 bg-paper" />;
+  return print ? <PrintDeck /> : <Presentation />;
 }
