@@ -24,7 +24,7 @@ function Chip({ children, on = true, delay = 0 }: { children: ReactNode; on?: bo
   );
 }
 
-function ScreenVisual({ v }: { v?: Visual }) {
+function ScreenVisual({ v }: { v?: Visual | undefined }) {
   switch (v) {
     case "stat":
       return (
@@ -173,7 +173,7 @@ function MiniCircle({ cracked = false }: { cracked?: boolean }) {
   );
 }
 
-function Bubble({ who, text, note, side }: { who: CharId; text: string; note?: string; side: "left" | "right" | "center" }) {
+function Bubble({ who, text, note, side }: { who: CharId; text: string; note?: string | undefined; side: "left" | "right" | "center" }) {
   return (
     <div className={`bubble anim-pop px-10 py-6 ${side === "right" ? "bubble-right" : "bubble-left"}`}>
       <div className="slide-chrome mb-1 font-bold text-sec">

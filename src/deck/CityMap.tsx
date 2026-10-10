@@ -19,7 +19,7 @@ const STOPS: P[] = [
 ];
 
 const segLen = (a: P, b: P) => Math.hypot(b.x - a.x, b.y - a.y);
-const CUM = ROUTE.reduce<number[]>((acc, p, i) => (i === 0 ? [0] : [...acc, acc[i - 1] + segLen(ROUTE[i - 1]!, p)]), []);
+const CUM = ROUTE.reduce<number[]>((acc, p, i) => (i === 0 ? [0] : [...acc, acc[i - 1]! + segLen(ROUTE[i - 1]!, p)]), []);
 function lengthOf(p: P) {
   let best = 0, bestD = Infinity;
   for (let i = 1; i < ROUTE.length; i++) {
@@ -83,7 +83,7 @@ function IsoBox({ c, r, h, color, windows = 0 }: { c: P; r: number; h: number; c
   );
 }
 
-function Building({ b, state, onPick }: { b: (typeof BUILDINGS)[number]; state: "active" | "dim" | "normal"; onPick?: (i: number) => void }) {
+function Building({ b, state, onPick }: { b: (typeof BUILDINGS)[number]; state: "active" | "dim" | "normal"; onPick?: ((i: number) => void) | undefined }) {
   const { c, r, h } = b;
   return (
     <g
@@ -159,7 +159,7 @@ export function CityMap({
 }: {
   active: number;
   mode: "static" | "browse" | "travel";
-  from?: number;
+  from?: number | undefined;
   onArrive?: () => void;
   onPick?: (i: number) => void;
 }) {
@@ -240,7 +240,7 @@ export function CityMap({
       <polyline points={road} className="fill-none stroke-silver" strokeWidth={64} strokeLinecap="round" strokeLinejoin="round" />
       <polyline points={road} className="fill-none stroke-deep" strokeWidth={5} strokeDasharray="22 16" strokeLinecap="round" />
       {/* arbres décoratifs */}
-      {[[450, 860], [700, 760], [1150, 820], [1550, 780], [1000, 960], [300, 930]].map(([x, y], i) => (
+      {([[450, 860], [700, 760], [1150, 820], [1550, 780], [1000, 960], [300, 930]] as [number, number][]).map(([x, y], i) => (
         <g key={i}>
           <rect x={x - 4} y={y - 10} width="8" height="22" className="fill-deep/60" />
           <circle cx={x} cy={y - 22} r="22" className={i % 2 ? "fill-lavender" : "fill-cosmic/70"} />
