@@ -35,7 +35,7 @@ export function SlideFrame({ fn, kicker, title, id, children }: { fn: Fn; kicker
       </div>
       <div className="absolute inset-x-[110px] bottom-[90px] top-[290px]">{children}</div>
       {/* détail d'ambiance discret : petit badge d'accueil Lina Cosmétiques */}
-      <div className="slide-chrome absolute bottom-[34px] right-[110px] flex items-center gap-3 text-deep/60">
+      <div className="slide-chrome absolute bottom-[34px] left-[110px] flex items-center gap-3 text-deep/60">
         <Sparkles className="h-5 w-5 text-sec" /> Lina Cosmétiques
       </div>
     </div>
@@ -324,7 +324,7 @@ export const SECTIONS: SectionDef[] = [
         render: () => (
           <div className="slide-content accent-neutral">
             <div className="absolute inset-0 opacity-35"><CityMap active={-1} mode="static" /></div>
-            <div className="absolute inset-0 bg-paper/50" />
+            <div className="absolute inset-0 bg-paper/75" />
             <div className="absolute left-[140px] top-[200px] max-w-[1400px]">
               <div className="slide-kicker anim-rise text-cosmic">Entrepreneuriat · Exposé 4</div>
               <h1 className="slide-title-lg anim-rise mt-6" style={{ animationDelay: ".1s" }}>Les principales fonctions de l'entreprise</h1>

@@ -44,9 +44,18 @@ export function Presentation() {
 
   // Lecture de l'URL (#1.3) au montage
   useEffect(() => {
-    const id = decodeURIComponent(window.location.hash.slice(1));
-    const f = FLAT.find((x) => x.sl.id === id);
-    if (f) setPos({ s: f.s, sub: f.sub });
+    const read = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const f = FLAT.find((x) => x.sl.id === id);
+      if (f) {
+        setPos((p) => (p.s === f.s && p.sub === f.sub ? p : { s: f.s, sub: f.sub }));
+        setStep(0);
+        setView("content");
+      }
+    };
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
   }, []);
   useEffect(() => {
     window.history.replaceState(window.history.state, "", `#${slide.id}`);
@@ -182,7 +191,7 @@ export function Presentation() {
             onArrive={arrive}
             onPick={(i) => goSection(i)}
           />
-          <div className="pointer-events-none absolute inset-x-0 top-6 flex justify-center">
+          <div className="pointer-events-none absolute bottom-6 left-6 flex">
             <div className="rounded-full bg-deep px-6 py-3 text-lg font-bold text-silver shadow-lg">
               {view === "travel" ? `En route vers : ${SECTIONS[travel.to]!.title}` : "La ville-entreprise — cliquez sur un bâtiment (Échap pour revenir)"}
             </div>
