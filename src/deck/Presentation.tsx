@@ -30,7 +30,11 @@ export function ScaledSlide({ children }: { children: ReactNode }) {
 type View = "content" | "travel" | "map";
 
 export function Presentation() {
-  const [pos, setPos] = useState({ s: 0, sub: 0 });
+  // Rendu uniquement côté navigateur : on lit directement le lien (#1.3)
+  const [pos, setPos] = useState(() => {
+    const f = typeof window !== "undefined" ? FLAT.find((x) => x.sl.id === decodeURIComponent(window.location.hash.slice(1))) : undefined;
+    return f ? { s: f.s, sub: f.sub } : { s: 0, sub: 0 };
+  });
   const [step, setStep] = useState(0);
   const [view, setView] = useState<View>("content");
   const [travel, setTravel] = useState<{ from: number; to: number; sub: number; last: boolean }>({ from: 0, to: 0, sub: 0, last: false });
@@ -53,7 +57,6 @@ export function Presentation() {
         setView("content");
       }
     };
-    read();
     window.addEventListener("hashchange", read);
     return () => window.removeEventListener("hashchange", read);
   }, []);
