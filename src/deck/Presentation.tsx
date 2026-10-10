@@ -225,7 +225,7 @@ function ToolBtn({ label, onClick, children }: { label: string; onClick: () => v
     <button
       aria-label={label}
       title={label}
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      onClick={(e) => { e.stopPropagation(); e.currentTarget.blur(); onClick(); }}
       className="flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-silver/20"
     >
       {children}
