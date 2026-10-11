@@ -25,6 +25,7 @@ export function SlideFrame({ fn, kicker, title, id, children }: { fn: Fn; kicker
   const accent = fn === "mk" ? "accent-mk" : fn === "rh" ? "accent-rh" : "accent-neutral";
   return (
     <div className={`slide-content ${accent}`}>
+      <div className="pointer-events-none absolute inset-0 opacity-[0.12]"><CityMap active={-1} mode="static" /></div>
       <div className="absolute left-0 top-0 h-full w-[18px] bg-sec" />
       <div className="absolute left-[110px] right-[110px] top-[70px] flex items-start justify-between">
         <div>
@@ -34,10 +35,6 @@ export function SlideFrame({ fn, kicker, title, id, children }: { fn: Fn; kicker
         <div className="slide-chrome rounded-full bg-silver px-5 py-2 font-bold">{id}</div>
       </div>
       <div className="absolute inset-x-[110px] bottom-[90px] top-[290px]">{children}</div>
-      {/* détail d'ambiance discret : petit badge d'accueil Lina Cosmétiques */}
-      <div className="slide-chrome absolute bottom-[34px] left-[110px] flex items-center gap-3 text-deep/60">
-        <Sparkles className="h-5 w-5 text-sec" /> Lina Cosmétiques
-      </div>
     </div>
   );
 }
@@ -81,16 +78,18 @@ function Definition({ text, example, step }: { text: ReactNode; example: ReactNo
   );
 }
 
-function Pictos({ items, step, at = 1 }: { items: { I: LucideIcon; t: string }[]; step: number; at?: number }) {
+function Pictos({ items, step, at = 1 }: { items: { I: LucideIcon; t: string; d?: string }[]; step: number; at?: number }) {
+  const w = items.length > 4 ? 280 : 330;
   return (
     <div className="absolute left-0 right-0 top-[170px] flex items-center justify-between">
-      {items.map(({ I, t }, i) => (
-        <div key={t} className="flex items-center gap-6">
-          <Reveal show={step >= at} style={{ transitionDelay: `${i * 0.12}s` }} className="card-3d flex w-[330px] flex-col items-center gap-4 px-6 py-8">
+      {items.map(({ I, t, d }, i) => (
+        <div key={t} className="flex items-center gap-4">
+          <Reveal show={step >= at} style={{ transitionDelay: `${i * 0.12}s`, width: w }} className="card-3d flex flex-col items-center gap-3 px-5 py-7 text-center">
             <I className="h-16 w-16 text-sec" strokeWidth={1.6} />
             <span className="slide-body font-bold">{t}</span>
+            {d && <span className="slide-caption text-deep/70">{d}</span>}
           </Reveal>
-          {i < items.length - 1 && <Reveal show={step >= at}><ArrowRight className="h-10 w-10 text-deep/40" /></Reveal>}
+          {i < items.length - 1 && <Reveal show={step >= at}><ArrowRight className="h-9 w-9 text-deep/40" /></Reveal>}
         </div>
       ))}
     </div>
@@ -144,8 +143,8 @@ const MK_MISSIONS: Actor[] = [
   { I: Search, t: "Étude de marché", ex: "Questionnaires, analyse des concurrents" },
   { I: Layers, t: "Segmentation", ex: "Découper le marché en groupes (âge, ville, attentes)" },
   { I: Crosshair, t: "Ciblage", ex: "Choisir le groupe : femmes 25-40 ans, urbaines" },
-  { I: Target, t: "Positionnement", ex: "« Le soin naturel, fait pour vous »" },
-  { I: Package, t: "Produit · Prix · Distribution · Communication", ex: "Les 4 leviers de l'offre" },
+  { I: Target, t: "Positionnement (Se différencier)", ex: "Définir ce qui rend le produit unique face aux concurrents (ex. 100 % naturel et local)" },
+  { I: Package, t: "Marketing Mix (Les 4P)", ex: "Produit, Prix, Distribution, Communication : l'offre concrète" },
   { I: Heart, t: "Fidélisation", ex: "Garder les clientes : conseils, suivi, carte fidélité" },
 ];
 
@@ -187,8 +186,8 @@ function MissionsTree({ root, rootI, items, step }: { root: string; rootI: Lucid
 function CompareTable({ step }: { step: number }) {
   const rows = [
     { I: Target, f: "Marketing", o: "Comprendre le marché et créer l'offre", q: "« À qui s'adresse la crème, et pourquoi ? »", e: "Cibler les femmes 25-40 ans, urbaines, sensibles au naturel" },
-    { I: ShoppingBag, f: "Ventes", o: "Conclure l'achat", q: "« Comment convaincre cette cliente d'acheter ? »", e: "Leïla place la crème dans 3 nouvelles parapharmacies" },
-    { I: Megaphone, f: "Publicité", o: "Faire connaître le message", q: "« Comment faire savoir que la crème existe ? »", e: "Campagne « Naturel, fait pour vous »" },
+    { I: ShoppingBag, f: "Ventes", o: "Conclure l'achat", q: "« Comment convaincre cette cliente d'acheter ? »", e: "L'équipe commerciale place la crème dans 3 nouvelles parapharmacies" },
+    { I: Megaphone, f: "Publicité", o: "Faire connaître le message", q: "« Comment faire savoir que la crème existe ? »", e: "Diffuser des annonces visuelles (réseaux sociaux, affiches) annonçant l'arrivée de la crème" },
   ];
   return (
     <div className="flex h-full flex-col gap-4">
@@ -224,8 +223,8 @@ function RhVsCompta({ step }: { step: number }) {
   return (
     <div className="flex h-full flex-col gap-6">
       <div className="grid h-[440px] grid-cols-2 gap-10">
-        <Reveal show={step >= 0}>{col(Calculator, "RH (Nadia)", "CALCULENT et GÈRENT la paie", ["Salaire de base, heures sup", "Primes, retenues, congés", "Corrigent les erreurs à la source"], "bg-cosmic text-silver")}</Reveal>
-        <Reveal show={step >= 1}>{col(FileText, "Comptabilité (Sami)", "ENREGISTRE et EXÉCUTE le paiement", ["Vérifie le montant", "Enregistre la charge salariale", "Exécute le virement via la banque"], "bg-silver")}</Reveal>
+        <Reveal show={step >= 0}>{col(Calculator, "RH", "CALCULENT et GÈRENT la paie", ["Salaire de base, heures sup", "Primes, retenues, congés", "Corrigent les erreurs à la source"], "bg-cosmic text-silver")}</Reveal>
+        <Reveal show={step >= 1}>{col(FileText, "Comptabilité", "ENREGISTRE et EXÉCUTE le paiement", ["Vérifie le montant", "Enregistre la charge salariale", "Exécute le virement via la banque"], "bg-silver")}</Reveal>
       </div>
       <Reveal show={step >= 2} className="flex items-center justify-center gap-5 rounded-[24px] bg-deep px-8 py-5 text-silver">
         {[{ I: Users, t: "Employés" }, { I: Calculator, t: "RH" }, { I: FileText, t: "Comptabilité" }, { I: Landmark, t: "Banque" }].map(({ I, t }, i) => (
@@ -240,78 +239,46 @@ function RhVsCompta({ step }: { step: number }) {
   );
 }
 
-function VirtuousCircle({ step }: { step: number }) {
-  const nodes = [
-    { I: UserPlus, t: "RH", d: "Bons recrutements", c: "bg-cosmic text-silver" },
-    { I: Megaphone, t: "Marketing", d: "Mieux comprendre la cliente", c: "bg-lavender text-deep" },
-    { I: Package, t: "Meilleur produit", d: "Offre ajustée", c: "bg-silver text-deep" },
-    { I: TrendingUp, t: "Croissance", d: "Ventes en hausse", c: "bg-deep text-silver" },
-    { I: Banknote, t: "Budget RH", d: "Plus de moyens pour les gens", c: "bg-cosmic text-silver" },
+function Synergy({ step }: { step: number }) {
+  const mk = [
+    { I: Award, t: "La marque employeur", d: "Une marque forte et attractive attire de meilleurs talents." },
+    { I: Search, t: "La vision des compétences", d: "Le marketing anticipe les attentes clients et indique les profils à recruter." },
+    { I: Megaphone, t: "L'alignement interne", d: "Chaque salarié comprend la promesse faite aux clients." },
   ];
-  const cx = 600, cy = 340, rx = 470, ry = 280;
+  const rh = [
+    { I: UserPlus, t: "Les bons talents au bon poste", d: "Recruter les créatifs, analystes et commerciaux qui réalisent la stratégie." },
+    { I: GraduationCap, t: "La formation terrain", d: "Former les vendeurs aux produits et à l'argumentaire." },
+    { I: Banknote, t: "Motivation & rémunération", d: "Des primes alignées sur la satisfaction client et les ventes." },
+  ];
+  const col = (title: string, items: typeof mk, cls: string, show: boolean) => (
+    <Reveal show={show} className={`flex flex-col gap-4 ${cls}`}>
+      <div className="slide-kicker text-sec">{title}</div>
+      {items.map((x) => (
+        <div key={x.t} className="card-3d flex items-start gap-5 p-6">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sec text-silver"><x.I className="h-8 w-8" /></div>
+          <div>
+            <div className="slide-body font-extrabold">{x.t}</div>
+            <div className="slide-caption mt-1 text-deep/75">{x.d}</div>
+          </div>
+        </div>
+      ))}
+    </Reveal>
+  );
   return (
-    <div className="flex h-full items-center gap-10">
-      <div className="relative h-[690px] w-[1200px] shrink-0">
-        <svg className="absolute inset-0" width="1200" height="690">
-          <ellipse cx={cx} cy={cy} rx={rx} ry={ry} className={`fill-none stroke-deep/30 ${step >= 5 ? "anim-flow" : ""}`} strokeWidth={8} />
-        </svg>
-        <div className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center" style={{ left: cx, top: cy }}>
-          <Repeat className={`h-24 w-24 text-deep ${step >= 5 ? "anim-spin" : ""}`} />
-          <span className="slide-caption mt-2 font-bold">Le cercle vertueux</span>
-        </div>
-        {nodes.map((n, i) => {
-          const a = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
-          const on = step >= i;
-          return (
-            <div
-              key={n.t}
-              className={`absolute flex w-[300px] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-[26px] p-5 text-center shadow-xl ${on ? n.c : "bg-silver text-deep/30"}`}
-              style={{ left: cx + Math.cos(a) * rx, top: cy + Math.sin(a) * ry, transition: "all .5s" }}
-            >
-              <n.I className="h-11 w-11" />
-              <span className="slide-body font-black">{n.t}</span>
-              <span className="slide-chrome whitespace-normal opacity-80">{n.d}</span>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex flex-col gap-6">
-        <div className="card-3d flex flex-col items-center p-10">
-          <span className="slide-kicker text-deep/60">Compteur de croissance</span>
-          <span className="whitespace-nowrap text-[120px] font-black leading-none tracking-tighter text-cosmic">+{[0, 5, 12, 20, 26, 30][Math.min(step, 5)]} %</span>
-          <span className="slide-caption text-center">Ventes au 1er trimestre (scénario 4)</span>
-        </div>
-      </div>
+    <div className="grid h-full grid-cols-[1fr_380px_1fr] items-center gap-8">
+      {col("Le Marketing apporte aux RH", mk, "accent-mk", step >= 0)}
+      <Reveal show={step >= 2} className="flex flex-col items-center gap-5 rounded-[32px] bg-deep p-8 text-center text-silver shadow-2xl">
+        <Repeat className="h-16 w-16" />
+        <p className="slide-body font-black">« Le marketing promet, les collaborateurs délivrent. »</p>
+        <p className="slide-caption opacity-85">Sans les RH, la promesse reste vide. Sans le Marketing, les RH n'ont pas de cap commercial.</p>
+      </Reveal>
+      {col("Les RH apportent au Marketing", rh, "accent-rh", step >= 1)}
     </div>
   );
 }
 
-function CaseStudy({ step }: { step: number }) {
-  const qs = [
-    { I: Search, f: "Marketing", q: "Quelles informations Sofia doit-elle collecter avant ce nouveau lancement ?" },
-    { I: UserPlus, f: "RH", q: "Quels profils Amine doit-il recruter ou former pour suivre la croissance ?" },
-    { I: Calculator, f: "Paie", q: "Qui calcule les primes de l'équipe commerciale, et qui les verse ?" },
-    { I: Repeat, f: "Système", q: "Comment une erreur RH pourrait-elle ruiner une campagne marketing ?" },
-  ];
-  return (
-    <div className="flex h-full flex-col gap-6">
-      <p className="slide-body-lg max-w-[1500px]">
-        <b>Lina Cosmétiques, 6 mois plus tard :</b> la crème « Éclat du Sud » et la gamme solaire se vendent bien. L'équipe grandit. À vous de réfléchir :
-      </p>
-      <div className="grid flex-1 grid-cols-2 gap-6">
-        {qs.map((q, i) => (
-          <Reveal key={q.f} show={step >= i} className={`card-3d flex items-start gap-5 p-8 ${i === 1 || i === 2 ? "accent-rh" : i === 0 ? "accent-mk" : "accent-neutral"}`}>
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-sec text-silver"><q.I className="h-9 w-9" /></div>
-            <div>
-              <div className="slide-kicker text-sec">{q.f}</div>
-              <div className="slide-body mt-2 font-semibold">{q.q}</div>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </div>
-  );
-}
+/** Lien du quiz (à renseigner quand le quiz sera prêt). */
+const QUIZ_URL = "";
 
 /* ---------------- Plan ---------------- */
 
@@ -326,15 +293,12 @@ export const SECTIONS: SectionDef[] = [
             <div className="absolute inset-0 opacity-35"><CityMap active={-1} mode="static" /></div>
             <div className="absolute inset-0 bg-paper/75" />
             <div className="absolute left-[140px] top-[200px] max-w-[1400px]">
-              <div className="slide-kicker anim-rise text-cosmic">Entrepreneuriat · Exposé 4</div>
+              <div className="slide-kicker anim-rise text-cosmic">Entrepreneuriat</div>
               <h1 className="slide-title-lg anim-rise mt-6" style={{ animationDelay: ".1s" }}>Les principales fonctions de l'entreprise</h1>
               <div className="anim-rise mt-12 flex gap-6" style={{ animationDelay: ".25s" }}>
-                <span className="slide-body-lg rounded-full bg-lavender px-9 py-4 font-bold">4.2 · Marketing</span>
-                <span className="slide-body-lg rounded-full bg-cosmic px-9 py-4 font-bold text-silver">4.3 · Ressources humaines</span>
+                <span className="slide-body-lg rounded-full bg-lavender px-9 py-4 font-bold">Marketing</span>
+                <span className="slide-body-lg rounded-full bg-cosmic px-9 py-4 font-bold text-silver">Ressources humaines</span>
               </div>
-              <p className="slide-body anim-rise mt-12 text-deep/70" style={{ animationDelay: ".4s" }}>
-                Fil rouge : <b className="text-deep">Lina Cosmétiques</b>, startup cosmétique algérienne
-              </p>
             </div>
           </div>
         ),
@@ -357,7 +321,7 @@ export const SECTIONS: SectionDef[] = [
         render: (s) => {
           const fns = [
             { I: Factory, t: "Production", k: "x" }, { I: Truck, t: "Achats", k: "x" }, { I: ShoppingBag, t: "Ventes", k: "x" },
-            { I: Megaphone, t: "Marketing", k: "mk" }, { I: Users, t: "Ressources humaines", k: "rh" }, { I: Landmark, t: "Finance", k: "x" },
+            { I: Landmark, t: "Finance", k: "x" }, { I: Megaphone, t: "Marketing", k: "mk" }, { I: Users, t: "Ressources humaines", k: "rh" },
           ];
           return (
             <SlideFrame fn="neutral" kicker="Rappel" title="L'arbre des fonctions de l'entreprise" id="0.3">
@@ -373,7 +337,7 @@ export const SECTIONS: SectionDef[] = [
                 <div className="absolute inset-x-0 top-[330px] grid grid-cols-6 gap-6">
                   {fns.map((f) => (
                     <div key={f.t} className={f.k === "mk" ? "accent-mk" : f.k === "rh" ? "accent-rh" : "accent-neutral"} style={{ transition: "all .6s", opacity: s >= 1 && f.k === "x" ? 0.3 : 1, transform: s >= 1 && f.k !== "x" ? "translateY(-16px) scale(1.06)" : "none" }}>
-                      <div className={`card-3d flex h-[230px] flex-col items-center justify-center gap-4 p-5 text-center ${s >= 1 && f.k !== "x" ? "bg-sec text-silver" : ""}`}>
+                      <div className={`card-3d flex h-[230px] flex-col items-center justify-center gap-4 p-5 text-center ${s >= 1 && f.k !== "x" ? "bg-deep text-silver" : ""}`}>
                         <f.I className="h-14 w-14" />
                         <span className="slide-caption font-extrabold">{f.t}</span>
                       </div>
@@ -381,7 +345,7 @@ export const SECTIONS: SectionDef[] = [
                   ))}
                 </div>
                 <Reveal show={s >= 1} className="slide-body absolute inset-x-0 bottom-0 text-center font-semibold">
-                  Aujourd'hui : <span className="text-lavender-dark">Marketing</span> et <span className="text-cosmic">Ressources humaines</span>.
+                  Aujourd'hui : Marketing et Ressources humaines.
                 </Reveal>
               </div>
             </SlideFrame>
@@ -400,7 +364,7 @@ export const SECTIONS: SectionDef[] = [
             <Definition
               step={s}
               text={<>L'ensemble des actions pour <b>comprendre les besoins des clients</b> et y <b>répondre mieux que les concurrents</b>.</>}
-              example={<>avant de lancer « Éclat du Sud », Sofia découvre ce que veulent vraiment ses clientes.</>}
+              example={<>avant de lancer « Éclat du Sud », le service marketing découvre ce que veulent vraiment les clientes.</>}
             />
             <Pictos step={s} items={[{ I: Search, t: "Écouter" }, { I: Target, t: "Comprendre" }, { I: Package, t: "Proposer" }, { I: Heart, t: "Fidéliser" }]} />
           </SlideFrame>
@@ -420,10 +384,10 @@ export const SECTIONS: SectionDef[] = [
           <SlideFrame fn="mk" kicker="Partie 1 · Marketing" title="Acteurs et environnement" id="1.3">
             <ActorsChart
               step={s}
-              center="Marketing (Sofia)"
+              center="Marketing"
               centerI={Megaphone}
               internes={[
-                { I: Briefcase, t: "Direction (Karim)", ex: "Valide le budget" },
+                { I: Briefcase, t: "Direction", ex: "Valide le budget" },
                 { I: ShoppingBag, t: "Équipe commerciale", ex: "Remonte les avis clients" },
                 { I: Factory, t: "Production", ex: "Adapte la formule" },
               ]}
@@ -459,10 +423,16 @@ export const SECTIONS: SectionDef[] = [
           <SlideFrame fn="rh" kicker="Partie 2 · Ressources humaines" title="Les RH, c'est quoi exactement ?" id="2.1">
             <Definition
               step={s}
-              text={<>La fonction qui <b>gère les personnes</b> de l'entreprise : les <b>trouver</b>, les <b>payer</b>, les <b>former</b>, les faire progresser et les <b>protéger</b>.</>}
-              example={<>Amine (DRH) recrute la bonne commerciale, Nadia calcule la paie de chaque salarié.</>}
+              text={<>La fonction qui <b>organise, développe et valorise le capital humain</b> de l'entreprise, en conciliant les besoins de <b>performance</b> de l'organisation et l'<b>épanouissement</b> des salariés.</>}
+              example={<>accompagner l'arrivée d'une nouvelle collaboratrice : de la sélection de son profil et la rédaction de son contrat, jusqu'à sa formation aux produits et le versement régulier de sa paie.</>}
             />
-            <Pictos step={s} items={[{ I: UserPlus, t: "Recruter" }, { I: Wallet, t: "Payer" }, { I: GraduationCap, t: "Former" }, { I: ShieldCheck, t: "Protéger" }]} />
+            <Pictos step={s} items={[
+              { I: UserPlus, t: "Recruter", d: "Identifier les besoins et sélectionner" },
+              { I: Handshake, t: "Intégrer", d: "Accueillir et accompagner" },
+              { I: GraduationCap, t: "Former", d: "Développer les compétences" },
+              { I: FileText, t: "Administrer", d: "Contrats, absences et paie" },
+              { I: Heart, t: "Engager", d: "Bien-être, dialogue et fidélisation" },
+            ]} />
           </SlideFrame>
         ),
       },
@@ -480,11 +450,11 @@ export const SECTIONS: SectionDef[] = [
           <SlideFrame fn="rh" kicker="Partie 2 · Ressources humaines" title="Acteurs et environnement" id="2.3">
             <ActorsChart
               step={s}
-              center="RH (Amine)"
+              center="RH"
               centerI={Users}
               internes={[
-                { I: Briefcase, t: "Direction (Karim)", ex: "Fixe la politique RH" },
-                { I: Award, t: "Managers (Leïla)", ex: "Expriment les besoins" },
+                { I: Briefcase, t: "Direction", ex: "Fixe la politique RH" },
+                { I: Award, t: "Managers", ex: "Expriment les besoins" },
                 { I: Users, t: "Employés", ex: "Paie, formation, carrière" },
               ]}
               externes={[
@@ -508,56 +478,50 @@ export const SECTIONS: SectionDef[] = [
           </SlideFrame>
         ),
       },
-    ],
-  },
-  {
-    id: 3, title: "Partie 3 · Un système vivant", short: "Système", fn: "neutral",
-    slides: [
-      { id: "3.1", title: "Scénario 4 — Le lancement en duo", steps: 1, scenario: SCENARIOS.s4 },
+      { id: "2.7", title: "Scénario 4 — Le lancement en duo", steps: 1, scenario: SCENARIOS.s4 },
       {
-        id: "3.2", title: "Le cercle vertueux", steps: 6,
+        id: "2.8", title: "Synergie Marketing ↔ RH", steps: 3,
         render: (s) => (
-          <SlideFrame fn="neutral" kicker="Partie 3 · Marketing & RH" title="Le cercle vertueux" id="3.2">
-            <VirtuousCircle step={s} />
-          </SlideFrame>
-        ),
-      },
-      {
-        id: "3.3", title: "Étude de cas", steps: 4,
-        render: (s) => (
-          <SlideFrame fn="neutral" kicker="Partie 3 · Marketing & RH" title="Étude de cas : Lina Cosmétiques à +6 mois" id="3.3">
-            <CaseStudy step={s} />
+          <SlideFrame fn="neutral" kicker="Marketing & RH" title="Synergie Marketing ↔ RH" id="2.8">
+            <Synergy step={s} />
           </SlideFrame>
         ),
       },
     ],
   },
   {
-    id: 4, title: "Quiz", short: "Quiz", fn: "neutral",
+    id: 3, title: "Quiz", short: "Quiz", fn: "neutral",
     slides: [
       {
-        id: "4.1", title: "Place au Quiz !", steps: 1,
+        id: "3.1", title: "Place au Quiz !", steps: 1,
         render: (_s, ctx) => (
-          <SlideFrame fn="neutral" kicker="Section 4" title="Place au Quiz !" id="4.1">
+          <SlideFrame fn="neutral" kicker="Quiz" title="Place au Quiz !" id="3.1">
             <div className="grid h-full grid-cols-[1fr_1fr] gap-12">
-              <div className="card-3d flex flex-col items-center justify-center gap-4 bg-deep p-10 text-silver">
-                <span className="slide-kicker text-lavender">Code PIN</span>
-                <span className="text-[110px] font-black tracking-widest">[PIN]</span>
-                <span className="slide-caption opacity-70">à remplacer le jour J</span>
+              <div className="card-3d flex flex-col items-center justify-center gap-6 bg-deep p-10 text-silver">
+                <span className="slide-kicker text-lavender">Scannez pour participer</span>
+                <div className="flex h-[360px] w-[360px] items-center justify-center rounded-[28px] border-4 border-dashed border-lavender">
+                  {QUIZ_URL ? <img src={`https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(QUIZ_URL)}`} alt="QR code du quiz" className="h-[340px] w-[340px] rounded-2xl bg-silver p-3" /> : <span className="slide-body opacity-70">QR code à venir</span>}
+                </div>
               </div>
               <div className="flex flex-col justify-center gap-6">
-                {["Sur votre téléphone, ouvrez l'application du quiz.", "Entrez le code PIN affiché.", "Choisissez un pseudo… et répondez vite !"].map((t, i) => (
+                {["Scannez le QR code ou cliquez sur « Lancer le Quiz ».", "Choisissez un pseudo.", "Répondez vite… et bien !"].map((t, i) => (
                   <div key={t} className="flex items-center gap-5">
                     <span className="slide-body flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cosmic font-black text-silver">{i + 1}</span>
                     <span className="slide-body font-semibold">{t}</span>
                   </div>
                 ))}
-                <div className="slide-caption flex items-center gap-3 rounded-2xl bg-silver px-6 py-4">
-                  <HelpCircle className="h-8 w-8 text-cosmic" /> Plan B : pas de réseau ? Quiz papier distribué en salle.
-                </div>
+                <a
+                  href={QUIZ_URL || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => { e.stopPropagation(); if (!QUIZ_URL) e.preventDefault(); }}
+                  className={`slide-body-lg mt-4 inline-flex w-fit items-center gap-4 rounded-full bg-deep px-10 py-5 font-black text-silver shadow-xl transition hover:-translate-y-1 ${QUIZ_URL ? "" : "opacity-60"}`}
+                >
+                  Lancer le Quiz <ArrowRight className="h-8 w-8" />
+                </a>
                 <button
-                  onClick={(e) => { e.stopPropagation(); ctx.goTo(5, 0); }}
-                  className="slide-body mt-2 inline-flex w-fit items-center gap-3 rounded-full bg-lavender px-8 py-4 font-bold transition hover:-translate-y-1"
+                  onClick={(e) => { e.stopPropagation(); ctx.goTo(4, 0); }}
+                  className="slide-body inline-flex w-fit items-center gap-3 rounded-full bg-lavender px-8 py-4 font-bold transition hover:-translate-y-1"
                 >
                   Aller à la conclusion <ArrowRight className="h-7 w-7" />
                 </button>
@@ -569,12 +533,12 @@ export const SECTIONS: SectionDef[] = [
     ],
   },
   {
-    id: 5, title: "Conclusion", short: "Conclusion", fn: "neutral",
+    id: 4, title: "Conclusion", short: "Conclusion", fn: "neutral",
     slides: [
       {
-        id: "5.1", title: "Synthèse", steps: 3,
+        id: "4.1", title: "Synthèse", steps: 3,
         render: (s) => (
-          <SlideFrame fn="neutral" kicker="Conclusion" title="3 idées à retenir" id="5.1">
+          <SlideFrame fn="neutral" kicker="Conclusion" title="3 idées à retenir" id="4.1">
             <div className="grid h-full grid-cols-3 gap-8">
               <Reveal show={s >= 0} className="accent-mk h-full"><IconCard I={Target} title="Marketing" text="COMPRENDRE le marché avant de vendre : étudier, segmenter, cibler, positionner." /></Reveal>
               <Reveal show={s >= 1} className="accent-rh h-full"><IconCard I={Users} title="Ressources humaines" text="Les bonnes PERSONNES, bien recrutées, payées justement et formées." /></Reveal>
@@ -584,14 +548,13 @@ export const SECTIONS: SectionDef[] = [
         ),
       },
       {
-        id: "5.2", title: "Merci — Questions ?", steps: 1,
+        id: "4.2", title: "Merci — Questions ?", steps: 1,
         render: () => (
           <div className="slide-content accent-neutral flex flex-col items-center justify-center">
-            <div className="absolute inset-0 opacity-30"><CityMap active={5} mode="static" /></div>
+            <div className="absolute inset-0 opacity-30"><CityMap active={4} mode="static" /></div>
             <div className="absolute inset-0 bg-paper/50" />
             <h2 className="slide-title-lg anim-pop relative">Merci !</h2>
             <p className="slide-subtitle anim-rise relative mt-8 text-cosmic" style={{ animationDelay: ".2s" }}>Des questions ?</p>
-            <p className="slide-body anim-rise relative mt-10 text-deep/70" style={{ animationDelay: ".35s" }}>Exposés 4.2 Marketing & 4.3 Ressources humaines — Lina Cosmétiques</p>
           </div>
         ),
       },
