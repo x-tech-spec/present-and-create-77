@@ -4,7 +4,7 @@ import { ScenarioScene } from "./Scenario";
 import { allFrames } from "./scenarios";
 import { SvgDefs } from "./Characters";
 
-/** Version imprimable : chaque étape visible = 1 page A4 paysage. */
+/** Version imprimable : 1 page par slide (contenu complet), scénarios étape par étape. */
 export function PrintDeck() {
   const pages: { key: string; node: React.ReactNode }[] = [];
   for (const sec of SECTIONS) {
@@ -12,7 +12,7 @@ export function PrintDeck() {
       if (sl.scenario) {
         allFrames(sl.scenario).forEach((f, i) => pages.push({ key: `${sl.id}-${i}`, node: <ScenarioScene sc={sl.scenario!} frame={f} /> }));
       } else {
-        for (let s = 0; s < sl.steps; s++) pages.push({ key: `${sl.id}-${s}`, node: sl.render?.(s, { goTo: () => {} }) });
+        pages.push({ key: sl.id, node: sl.render?.(sl.steps - 1, { goTo: () => {} }) });
       }
     }
   }

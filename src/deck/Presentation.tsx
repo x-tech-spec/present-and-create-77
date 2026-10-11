@@ -27,7 +27,7 @@ export function ScaledSlide({ children }: { children: ReactNode }) {
   );
 }
 
-type View = "content" | "travel" | "map";
+type View = "content" | "travel" | "map" | "plan";
 
 export function Presentation() {
   // Rendu uniquement côté navigateur : on lit directement le lien (#1.3)
@@ -97,7 +97,18 @@ export function Presentation() {
     setView("content");
   }, [travel]);
 
+  const startTrip = useCallback((to = 0) => {
+    play("click");
+    setTravel({ from: -1, to, sub: to === 0 ? 1 : 0, last: false });
+    setView("travel");
+  }, []);
+
   const nextSub = useCallback(() => {
+    if (pos.s === 0 && pos.sub === 0) {
+      play("click");
+      setView("plan");
+      return;
+    }
     if (pos.sub + 1 < section.slides.length) {
       setPos({ s: pos.s, sub: pos.sub + 1 });
       setStep(0);
@@ -144,6 +155,11 @@ export function Presentation() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (view === "travel") return;
+      if (view === "plan") {
+        if ([" ", "Enter", "PageDown", "ArrowRight", "ArrowDown"].includes(e.key)) { e.preventDefault(); startTrip(0); }
+        else if (["Escape", "Backspace", "PageUp", "ArrowLeft", "ArrowUp"].includes(e.key)) setView("content");
+        return;
+      }
       if (view === "map") {
         if (e.key === "Escape" || e.key.toLowerCase() === "m") setView("content");
         return;
@@ -161,7 +177,7 @@ export function Presentation() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [view, pos, goSection, nextSub, prevSub, next, prev, toggleFs]);
+  }, [view, pos, goSection, nextSub, prevSub, next, prev, toggleFs, startTrip]);
 
   // Swipe tactile
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -197,18 +213,18 @@ export function Presentation() {
         </div>
       )}
       {view !== "content" && (
-        <div className="relative h-full w-full">
+        <div className={`relative h-full w-full ${view === "plan" ? "cursor-pointer" : ""}`} onClick={view === "plan" ? () => startTrip(0) : undefined}>
           <CityMap
-            key={view === "travel" ? `t${travel.from}-${travel.to}` : "browse"}
+            key={view === "travel" ? `t${travel.from}-${travel.to}` : view}
             mode={view === "travel" ? "travel" : "browse"}
-            active={view === "travel" ? travel.to : pos.s}
-            from={view === "travel" ? travel.from : undefined}
+            active={view === "travel" ? travel.to : view === "plan" ? -1 : pos.s}
+            from={view === "travel" ? travel.from : view === "plan" ? -1 : undefined}
             onArrive={arrive}
-            onPick={(i) => goSection(i)}
+            onPick={(i) => (view === "plan" ? startTrip(i) : goSection(i))}
           />
           <div className="pointer-events-none absolute bottom-6 left-6 flex">
             <div className="rounded-full bg-deep px-6 py-3 text-lg font-bold text-silver shadow-lg">
-              {view === "travel" ? `En route vers : ${SECTIONS[travel.to]!.title}` : "La ville-entreprise — cliquez sur un bâtiment (Échap pour revenir)"}
+              {view === "travel" ? `En route vers : ${SECTIONS[travel.to]!.title}` : view === "plan" ? "Le plan : Introduction · Marketing · Ressources Humaines · Quiz · Conclusion — cliquez pour démarrer" : "La ville-entreprise — cliquez sur un bâtiment (Échap pour revenir)"}
             </div>
           </div>
         </div>
