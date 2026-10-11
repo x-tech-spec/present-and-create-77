@@ -104,7 +104,7 @@ function Building({ b, state, onPick }: { b: (typeof BUILDINGS)[number]; state: 
           </g>
         </>
       )}
-      {b.kind === "place" && (
+      {(b.kind as string) === "place" && (
         <>
           <IsoBox c={c} r={r} h={h} color="fill-silver" />
           <circle cx={c.x} cy={c.y - h} r={22} className="fill-lavender stroke-deep/40" />
