@@ -15,7 +15,8 @@
     "test:firebase-emulator": "firebase emulators:exec --only database \"vitest run src/test/firebase-rtdb-emulator.test.ts\""
   },
   "overrides": {
-    "rolldown": "1.2.1"
+    "rolldown": "1.2.1",
+    "@grpc/grpc-js": "^1.13.6"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
