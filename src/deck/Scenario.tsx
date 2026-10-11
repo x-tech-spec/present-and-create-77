@@ -75,7 +75,7 @@ function ScreenVisual({ v }: { v?: Visual | undefined }) {
         <div className="anim-pop flex items-center gap-6 rounded-3xl bg-paper p-6 shadow-xl">
           <Bell className="h-16 w-16 text-sec" />
           <div>
-            <div className="slide-chrome font-bold">Leïla · Directrice commerciale</div>
+            <div className="slide-chrome font-bold">Manager commercial</div>
             <div className="slide-caption">Nouveau message — URGENT</div>
           </div>
         </div>
