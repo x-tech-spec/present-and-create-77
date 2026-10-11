@@ -3,15 +3,24 @@
     "sessions": {
       "$pin": {
         ".read": true,
-        ".write": "!data.exists() || newData.child('pin').val() == $pin",
+        ".write": "!data.exists() || (data.child('hostToken').exists() && newData.child('hostToken').val() === data.child('hostToken').val()) || (!data.child('hostToken').exists() && newData.child('pin').val() == $pin)",
         "pin": {
           ".validate": "newData.isString() && newData.val() == $pin"
+        },
+        "hostToken": {
+          ".validate": "newData.isString() && newData.val().length >= 6"
         },
         "state": {
           ".validate": "newData.isString() && (newData.val() == 'lobby' || newData.val() == 'travel' || newData.val() == 'question' || newData.val() == 'correction' || newData.val() == 'intermediate_rank' || newData.val() == 'podium')"
         },
         "currentBuilding": {
           ".validate": "newData.isString() && (newData.val() == 'mairie' || newData.val() == 'marketing' || newData.val() == 'rh' || newData.val() == 'place' || newData.val() == 'stade' || newData.val() == 'gare')"
+        },
+        "currentBuildingIndex": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4"
+        },
+        "previousBuildingIndex": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4"
         },
         "currentQuestionIndex": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 7"
@@ -25,7 +34,7 @@
         "players": {
           "$playerId": {
             ".read": true,
-            ".write": "!data.exists() || data.child('id').val() == $playerId || newData.child('id').val() == $playerId",
+            ".write": "!data.exists() || data.child('id').val() == $playerId || (root.child('sessions').child($pin).child('hostToken').exists() && newData.parent().parent().child('hostToken').val() === root.child('sessions').child($pin).child('hostToken').val())",
             "id": {
               ".validate": "newData.isString() && newData.val() == $playerId"
             },
