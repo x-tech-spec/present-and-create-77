@@ -496,34 +496,58 @@ export const SECTIONS: SectionDef[] = [
         id: "3.1", title: "Place au Quiz !", steps: 1,
         render: (_s, ctx) => (
           <SlideFrame fn="neutral" kicker="Quiz" title="Place au Quiz !" id="3.1">
-            <div className="grid h-full grid-cols-[1fr_1fr] gap-12">
+            <div className="grid h-full grid-cols-[1.1fr_0.9fr] gap-12 items-center">
               <div className="card-3d flex flex-col items-center justify-center gap-6 bg-deep p-10 text-silver">
-                <span className="slide-kicker text-lavender">Scannez pour participer</span>
-                <div className="flex h-[360px] w-[360px] items-center justify-center rounded-[28px] border-4 border-dashed border-lavender">
-                  {QUIZ_URL ? <img src={`https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(QUIZ_URL)}`} alt="QR code du quiz" className="h-[340px] w-[340px] rounded-2xl bg-silver p-3" /> : <span className="slide-body opacity-70">QR code à venir</span>}
+                <span className="slide-kicker text-lavender">Le Bus Quizz · Vidéoprojecteur & Smartphones</span>
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-silver text-deep shadow-lg">
+                    <Truck className="h-14 w-14" />
+                  </div>
+                  <div className="slide-title-sm text-silver font-black">
+                    Visite de la Ville Bâtiment par Bâtiment
+                  </div>
+                  <p className="slide-body text-silver/80 max-w-md">
+                    7 questions individuelles : Mairie, Marketing, RH, Place et Stade. Synchronisation temps réel ou projection.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+                  <a
+                    href="?mode=host"
+                    onClick={(e) => { e.stopPropagation(); window.location.href = "?mode=host"; }}
+                    className="slide-body inline-flex items-center gap-3 rounded-full bg-lavender px-8 py-4 font-black text-deep shadow-xl transition hover:-translate-y-1 cursor-pointer"
+                  >
+                    Lancer l'écran Host (Vidéoprojecteur) <ArrowRight className="h-6 w-6" />
+                  </a>
+                  <a
+                    href="?mode=player"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="slide-body inline-flex items-center gap-3 rounded-full border border-silver/40 bg-deep px-6 py-4 font-bold text-silver transition hover:bg-deep-dark"
+                  >
+                    Tester l'écran Player (Mobile)
+                  </a>
                 </div>
               </div>
+
               <div className="flex flex-col justify-center gap-6">
-                {["Scannez le QR code ou cliquez sur « Lancer le Quiz ».", "Choisissez un pseudo.", "Répondez vite… et bien !"].map((t, i) => (
+                {[
+                  "Lancez l'écran Host sur le vidéoprojecteur (Plein écran : touche F).",
+                  "Les étudiants scannent le QR code affiché à l'écran.",
+                  "Chaque étudiant saisit son pseudo et sa silhouette.",
+                  "Le bus démarre avec ESPACE : questions interactives et podium à la Gare !"
+                ].map((t, i) => (
                   <div key={t} className="flex items-center gap-5">
                     <span className="slide-body flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cosmic font-black text-silver">{i + 1}</span>
                     <span className="slide-body font-semibold">{t}</span>
                   </div>
                 ))}
-                <a
-                  href={QUIZ_URL || undefined}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => { e.stopPropagation(); if (!QUIZ_URL) e.preventDefault(); }}
-                  className={`slide-body-lg mt-4 inline-flex w-fit items-center gap-4 rounded-full bg-deep px-10 py-5 font-black text-silver shadow-xl transition hover:-translate-y-1 ${QUIZ_URL ? "" : "opacity-60"}`}
-                >
-                  Lancer le Quiz <ArrowRight className="h-8 w-8" />
-                </a>
+
                 <button
                   onClick={(e) => { e.stopPropagation(); ctx.goTo(4, 0); }}
-                  className="slide-body inline-flex w-fit items-center gap-3 rounded-full bg-lavender px-8 py-4 font-bold transition hover:-translate-y-1"
+                  className="slide-body mt-4 inline-flex w-fit items-center gap-3 rounded-full bg-silver border border-deep/20 px-8 py-4 font-bold text-deep transition hover:-translate-y-1 cursor-pointer"
                 >
-                  Aller à la conclusion <ArrowRight className="h-7 w-7" />
+                  Passer directement à la conclusion <ArrowRight className="h-6 w-6" />
                 </button>
               </div>
             </div>
