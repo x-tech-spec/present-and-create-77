@@ -8,12 +8,11 @@ const ROUTE: P[] = [
   { x: 1400, y: 760 },
   { x: 1860, y: 530 },
 ];
-// Arrêts (sur la route) : 0 Mairie · 1 Marketing · 2 RH · 3 Place · 4 Stade · 5 Gare
+// Arrêts (sur la route) : 0 Introduction · 1 Marketing · 2 RH · 3 Quiz · 4 Conclusion
 const STOPS: P[] = [
   { x: 300, y: 710 },
   { x: 650, y: 535 },
   { x: 950, y: 535 },
-  { x: 800, y: 460 },
   { x: 1300, y: 710 },
   { x: 1700, y: 610 },
 ];
@@ -33,6 +32,8 @@ function lengthOf(p: P) {
   return best;
 }
 const STOP_L = STOPS.map(lengthOf);
+/** Position sur la route : -1 = début de la rue. */
+const stopL = (i: number) => (i < 0 ? 0 : STOP_L[i]!);
 function pointAt(l: number): P & { dx: number } {
   for (let i = 1; i < ROUTE.length; i++) {
     if (l <= CUM[i]! || i === ROUTE.length - 1) {
@@ -45,12 +46,11 @@ function pointAt(l: number): P & { dx: number } {
 }
 
 const BUILDINGS = [
-  { id: 0, label: "Mairie · Introduction", c: { x: 251, y: 612 }, r: 100, h: 150, color: "fill-silver", kind: "mairie" },
+  { id: 0, label: "Introduction", c: { x: 251, y: 612 }, r: 100, h: 150, color: "fill-silver", kind: "mairie" },
   { id: 1, label: "Marketing", c: { x: 601, y: 437 }, r: 110, h: 250, color: "fill-lavender", kind: "tower" },
-  { id: 2, label: "Ressources humaines", c: { x: 999, y: 437 }, r: 110, h: 250, color: "fill-cosmic", kind: "tower" },
-  { id: 3, label: "La Place · Système", c: { x: 800, y: 330 }, r: 90, h: 20, color: "fill-silver", kind: "place" },
-  { id: 4, label: "Stade · Quiz", c: { x: 1349, y: 612 }, r: 120, h: 60, color: "fill-silver", kind: "stade" },
-  { id: 5, label: "Gare · Conclusion", c: { x: 1651, y: 512 }, r: 120, h: 90, color: "fill-silver", kind: "gare" },
+  { id: 2, label: "Ressources Humaines", c: { x: 999, y: 437 }, r: 110, h: 250, color: "fill-cosmic", kind: "tower" },
+  { id: 3, label: "Quiz", c: { x: 1349, y: 612 }, r: 120, h: 60, color: "fill-silver", kind: "stade" },
+  { id: 4, label: "Conclusion", c: { x: 1651, y: 512 }, r: 120, h: 90, color: "fill-silver", kind: "gare" },
 ] as const;
 
 const pts = (a: [number, number][]) => a.map((p) => p.join(",")).join(" ");
@@ -164,7 +164,7 @@ export function CityMap({
   onPick?: (i: number) => void;
 }) {
   const start = from ?? active;
-  const [truckL, setTruckL] = useState(STOP_L[Math.max(0, mode === "travel" ? start : active)]! ?? STOP_L[0]!);
+  const [truckL, setTruckL] = useState(stopL(mode === "travel" || from !== undefined ? start : active));
   const [vb, setVb] = useState({ x: 0, y: 0, w: 1920, h: 1080 });
   const [fade, setFade] = useState(1);
   const [flip, setFlip] = useState(false);
@@ -175,7 +175,7 @@ export function CityMap({
     arrived.current = false;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) { onArrive?.(); return; }
-    const L0 = STOP_L[start]!, L1 = STOP_L[active]!;
+    const L0 = stopL(start), L1 = stopL(active);
     const DRIVE = 1700, ENTER = 650;
     const t0 = performance.now();
     let raf = 0;
@@ -247,7 +247,7 @@ export function CityMap({
         </g>
       ))}
       {/* bâtiments (ordre de profondeur) */}
-      {[3, 1, 2, 0, 5, 4].map((i) => (
+      {[1, 2, 0, 4, 3].map((i) => (
         <Building key={i} b={BUILDINGS[i]!} state={active < 0 ? "normal" : i === active ? "active" : "dim"} onPick={mode === "browse" ? onPick : undefined} />
       ))}
       {/* employés qui marchent */}

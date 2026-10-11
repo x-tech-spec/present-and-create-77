@@ -78,7 +78,7 @@ export function Character({ id, size = 340, speaking = false, label = true }: { 
       </svg>
       {label && (
         <div className="slide-chrome mt-2 rounded-full bg-deep px-5 py-2 font-semibold text-silver">
-          {CHARACTERS[id].name} · <span className="font-normal opacity-80">{CHARACTERS[id].role}</span>
+          {CHARACTERS[id].name}
         </div>
       )}
     </div>

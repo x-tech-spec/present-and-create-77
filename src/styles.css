@@ -133,6 +133,7 @@
 .slide-kicker { font-size: var(--slide-kicker); line-height: 1.1; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; }
 .slide-chrome { font-size: var(--slide-chrome); line-height: 1.15; white-space: nowrap; }
 
+@layer components {
 /* Cartes avec hover 3D */
 .card-3d {
   background: var(--silver);
@@ -144,6 +145,8 @@
 .card-3d:hover {
   transform: perspective(900px) rotateX(4deg) rotateY(-4deg) translateY(-6px);
   box-shadow: var(--shadow-lift);
+}
+
 }
 
 /* Panneaux de feedback */
