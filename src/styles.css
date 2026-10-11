@@ -218,10 +218,23 @@
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* ---------- Impression : 1 étape = 1 page A4 paysage ---------- */
-.print-root { overflow: auto; height: auto; }
-.print-root .slide-content { background: oklch(1 0 0); }
-.print-root *, .print-root *::before, .print-root *::after { animation: none !important; transition: none !important; }
+/* ---------- Impression : 1 étape = 1 page A4 paysage (Charte Cosmic Purple préservée) ---------- */
+.print-root {
+  overflow: auto;
+  height: auto;
+  background-color: var(--paper);
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+.print-root *,
+.print-root *::before,
+.print-root *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 .print-page {
   width: 297mm;
   height: 210mm;
@@ -229,19 +242,81 @@
   overflow: hidden;
   break-after: page;
   page-break-after: always;
-  background: oklch(1 0 0);
+  break-inside: avoid;
+  page-break-inside: avoid;
+  background-color: var(--paper) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
 }
+
+.print-page .slide-content {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
 .print-page > .print-scale {
-  position: absolute;
-  left: 0; top: 81px;
-  transform-origin: top left;
-  transform: scale(0.5845);
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  transform-origin: center center;
+  transform: scale(0.5846); /* 1122.5px / 1920px */
+  flex-shrink: 0;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
 }
-@page { size: A4 landscape; margin: 0; }
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
 @media print {
-  html, body { overflow: visible !important; height: auto !important; background: oklch(1 0 0); }
-  .no-print { display: none !important; }
-  .print-root { padding: 0 !important; position: static !important; overflow: visible !important; background: oklch(1 0 0) !important; }
-  .print-root > div { gap: 0 !important; }
-  .print-page { margin: 0 !important; box-shadow: none !important; }
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: var(--paper) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-root {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: static !important;
+    overflow: visible !important;
+    background-color: var(--paper) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .print-container {
+    gap: 0 !important;
+    display: block !important;
+  }
+  .print-page {
+    margin: 0 !important;
+    box-shadow: none !important;
+    break-after: page !important;
+    page-break-after: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    width: 297mm !important;
+    height: 210mm !important;
+    background-color: var(--paper) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
 }
