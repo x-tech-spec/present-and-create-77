@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import QRCode from "qrcode";
 import { CityMap } from "./CityMap";
 import {
+  Truck,
   Volume2,
   VolumeX,
   Maximize2,
