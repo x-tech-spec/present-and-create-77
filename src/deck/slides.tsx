@@ -403,7 +403,7 @@ export const SECTIONS: SectionDef[] = [
           </SlideFrame>
         ),
       },
-      { id: "1.4", title: "Scénario 1 — Le lancement", steps: 1, scenario: SCENARIOS.s1 },
+      { id: "1.4", title: "Scénario 1 — Le lancement", steps: 1, scenario: SCENARIOS["s1"]! },
       {
         id: "1.5", title: "Marketing / Ventes / Publicité", steps: 3,
         render: (s) => (
@@ -468,8 +468,8 @@ export const SECTIONS: SectionDef[] = [
           </SlideFrame>
         ),
       },
-      { id: "2.4", title: "Scénario 2 — L'embauche urgente", steps: 1, scenario: SCENARIOS.s2 },
-      { id: "2.5", title: "Scénario 3 — Qui paie les salaires ?", steps: 1, scenario: SCENARIOS.s3 },
+      { id: "2.4", title: "Scénario 2 — L'embauche urgente", steps: 1, scenario: SCENARIOS["s2"]! },
+      { id: "2.5", title: "Scénario 3 — Qui paie les salaires ?", steps: 1, scenario: SCENARIOS["s3"]! },
       {
         id: "2.6", title: "RH vs Comptabilité", steps: 3,
         render: (s) => (
@@ -478,7 +478,7 @@ export const SECTIONS: SectionDef[] = [
           </SlideFrame>
         ),
       },
-      { id: "2.7", title: "Scénario 4 — Le lancement en duo", steps: 1, scenario: SCENARIOS.s4 },
+      { id: "2.7", title: "Scénario 4 — Le lancement en duo", steps: 1, scenario: SCENARIOS["s4"]! },
       {
         id: "2.8", title: "Synergie Marketing ↔ RH", steps: 3,
         render: (s) => (

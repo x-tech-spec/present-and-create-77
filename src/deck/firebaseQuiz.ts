@@ -41,13 +41,13 @@ export type SessionData = {
 
 // Configuration Firebase via variables d'environnement (avec fallback démo)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD-LinaCosmeticsQuizDemoKey",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "lina-cosmetiques-quiz.firebaseapp.com",
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://lina-cosmetiques-quiz-default-rtdb.firebaseio.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "lina-cosmetiques-quiz",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "lina-cosmetiques-quiz.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "100000000000",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:100000000000:web:abcdef123456",
+  apiKey: import.meta.env["VITE_FIREBASE_API_KEY"] || "AIzaSyD-LinaCosmeticsQuizDemoKey",
+  authDomain: import.meta.env["VITE_FIREBASE_AUTH_DOMAIN"] || "lina-cosmetiques-quiz.firebaseapp.com",
+  databaseURL: import.meta.env["VITE_FIREBASE_DATABASE_URL"] || "https://lina-cosmetiques-quiz-default-rtdb.firebaseio.com",
+  projectId: import.meta.env["VITE_FIREBASE_PROJECT_ID"] || "lina-cosmetiques-quiz",
+  storageBucket: import.meta.env["VITE_FIREBASE_STORAGE_BUCKET"] || "lina-cosmetiques-quiz.appspot.com",
+  messagingSenderId: import.meta.env["VITE_FIREBASE_MESSAGING_SENDER_ID"] || "100000000000",
+  appId: import.meta.env["VITE_FIREBASE_APP_ID"] || "1:100000000000:web:abcdef123456",
 };
 
 let app: FirebaseApp | null = null;
@@ -56,13 +56,13 @@ let isFirebaseAvailable = false;
 
 // Détection d'environnement Firebase valide
 const isConfiguredEnv = Boolean(
-  import.meta.env.VITE_FIREBASE_API_KEY &&
-  import.meta.env.VITE_FIREBASE_API_KEY !== "AIzaSyD-LinaCosmeticsQuizDemoKey" &&
-  import.meta.env.VITE_FIREBASE_DATABASE_URL &&
-  !import.meta.env.VITE_FIREBASE_DATABASE_URL.includes("lina-cosmetiques-quiz-default-rtdb")
+  import.meta.env["VITE_FIREBASE_API_KEY"] &&
+  import.meta.env["VITE_FIREBASE_API_KEY"] !== "AIzaSyD-LinaCosmeticsQuizDemoKey" &&
+  import.meta.env["VITE_FIREBASE_DATABASE_URL"] &&
+  !import.meta.env["VITE_FIREBASE_DATABASE_URL"].includes("lina-cosmetiques-quiz-default-rtdb")
 );
 
-const isTestEnv = typeof process !== "undefined" && (process.env?.NODE_ENV === "test" || import.meta.env?.MODE === "test");
+const isTestEnv = typeof process !== "undefined" && (process.env?.["NODE_ENV"] === "test" || import.meta.env?.MODE === "test");
 
 try {
   if (typeof window !== "undefined" && isConfiguredEnv && !isTestEnv) {

@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import QRCode from "qrcode";
+import { CityMap } from "./CityMap";
 import {
+  Truck,
   Volume2,
   VolumeX,
   Maximize2,
@@ -60,6 +62,8 @@ export function QuizHost() {
   const [soundActive, setSoundActive] = useState(isSoundOn());
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [travelProgress, setTravelProgress] = useState(0);
+  const [travelFrom, setTravelFrom] = useState(0);
+  const [travelTo, setTravelTo] = useState(0);
 
   // Initialisation de la session
   useEffect(() => {
