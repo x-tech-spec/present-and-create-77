@@ -62,7 +62,7 @@ const isConfiguredEnv = Boolean(
   !import.meta.env["VITE_FIREBASE_DATABASE_URL"].includes("lina-cosmetiques-quiz-default-rtdb")
 );
 
-const isTestEnv = typeof process !== "undefined" && (process.env?.NODE_ENV === "test" || import.meta.env?.MODE === "test");
+const isTestEnv = typeof process !== "undefined" && (process.env?.["NODE_ENV"] === "test" || import.meta.env?.MODE === "test");
 
 try {
   if (typeof window !== "undefined" && isConfiguredEnv && !isTestEnv) {

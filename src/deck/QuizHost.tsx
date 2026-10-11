@@ -61,6 +61,8 @@ export function QuizHost() {
   const [soundActive, setSoundActive] = useState(isSoundOn());
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [travelProgress, setTravelProgress] = useState(0);
+  const [travelFrom, setTravelFrom] = useState(0);
+  const [travelTo, setTravelTo] = useState(0);
 
   // Initialisation de la session
   useEffect(() => {
