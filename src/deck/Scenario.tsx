@@ -228,10 +228,10 @@ function ScreenVisual({ v }: { v?: Visual | undefined }) {
           <div>
             <div className="slide-kicker text-sec">INTÉGRATION RÉUSSIE</div>
             <div className="text-[34px] font-black text-deep">Bienvenue Lina !</div>
-            <div className="mt-2 flex flex-col gap-1 text-[17px] font-semibold text-deep/80">
-              <span>✅ Plan d'accueil & parrain désigné</span>
-              <span>✅ Formation produit & terrain</span>
-              <span>✅ 100 % autonome en 1 mois</span>
+            <div className="mt-2 flex flex-col gap-1.5 text-[17px] font-semibold text-deep/80">
+              <div className="flex items-center gap-2.5"><CheckCircle2 className="h-5 w-5 text-sec shrink-0" /><span>Plan d'accueil & parrain désigné</span></div>
+              <div className="flex items-center gap-2.5"><CheckCircle2 className="h-5 w-5 text-sec shrink-0" /><span>Formation produit & terrain</span></div>
+              <div className="flex items-center gap-2.5"><CheckCircle2 className="h-5 w-5 text-sec shrink-0" /><span>100 % autonome en 1 mois</span></div>
             </div>
           </div>
         </div>
@@ -370,20 +370,28 @@ function MiniCircle({ cracked = false, activeLink = 4 }: { cracked?: boolean; ac
   return (
     <div className="relative h-[270px] w-[620px]">
       <svg className="absolute inset-0" viewBox="0 0 620 270">
-        <ellipse cx="310" cy="135" rx="250" ry="105" className={`fill-none stroke-deep/40 ${cracked ? "" : "anim-flow"}`} strokeWidth={6} />
+        <ellipse
+          cx="310"
+          cy="135"
+          rx="250"
+          ry="105"
+          className={`fill-none stroke-deep/40 ${cracked ? "" : "anim-flow"}`}
+          strokeWidth={6}
+        />
         {cracked && <path d="M295 20 L325 65 L290 100 L330 145" className="fill-none stroke-destructive" strokeWidth={8} />}
       </svg>
       {items.map(({ t, I, c }, i) => {
         const a = (i / items.length) * Math.PI * 2 - Math.PI / 2;
+        const isRevealed = i + 1 <= activeLink;
         const isCurrent = i + 1 === activeLink;
-        const isPassed = i + 1 <= activeLink;
+        if (!isRevealed && !cracked) return null;
         return (
           <div
             key={t}
-            className={`anim-pop slide-chrome absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full px-4 py-2 font-semibold transition-all ${c} ${
+            className={`slide-chrome absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${c} ${
               cracked && i === 0 ? "line-through opacity-50 bg-destructive text-silver" : ""
-            } ${isCurrent ? "ring-4 ring-sec/40 scale-105 shadow-lg" : !isPassed ? "opacity-40" : ""}`}
-            style={{ left: 310 + Math.cos(a) * 250, top: 135 + Math.sin(a) * 105, animationDelay: `${i * 0.3}s` }}
+            } ${isCurrent ? "ring-4 ring-sec/40 scale-105 shadow-lg anim-pop" : "shadow-md"}`}
+            style={{ left: 310 + Math.cos(a) * 250, top: 135 + Math.sin(a) * 105 }}
           >
             <I className="h-5 w-5" /> {t}
           </div>
@@ -444,7 +452,7 @@ export function ScenarioScene({
       : frame.k === "after"
       ? step?.narrator
       : frame.k === "lesson"
-      ? "📖 La règle d'or à retenir pour toujours"
+      ? "La règle d'or à retenir"
       : null;
 
   const choose = (c: number) => {
@@ -461,26 +469,28 @@ export function ScenarioScene({
       <OfficeBackdrop plaque={sc.plaque} />
 
       {/* En-tête : Titre à gauche, numéro d'étape à droite */}
-      <div className="absolute left-[380px] right-[400px] top-[30px] flex items-center justify-between">
-        <div className="flex items-baseline gap-5">
-          <span className="slide-kicker text-sec">{sc.fn === "mk" ? "Marketing" : sc.fn === "rh" ? "Ressources humaines" : "Marketing × RH"}</span>
-          <span className="text-[38px] font-extrabold tracking-tight">{sc.title}</span>
+      <div className="absolute inset-x-[120px] top-[24px] flex items-center justify-between">
+        <div className="flex items-baseline gap-4">
+          <span className="slide-kicker text-sec font-bold">{sc.fn === "mk" ? "Marketing" : sc.fn === "rh" ? "Ressources humaines" : "Marketing × RH"}</span>
+          <span className="text-[34px] font-extrabold tracking-tight text-deep">{sc.title}</span>
         </div>
-        <div className="slide-chrome rounded-full bg-deep px-5 py-2 font-semibold text-silver shrink-0 shadow-sm">
+        <div className="slide-chrome rounded-full bg-deep px-5 py-2 font-bold text-silver shrink-0 shadow-sm text-[16px]">
           Étape {stepNo}/{totalSteps} · {stepLabel}
         </div>
       </div>
 
-      {/* Cartouche narrateur — conforme au cahier des charges Cosmic Purple */}
+      {/* Cartouche narrateur — bande rectangulaire fixe bords arrondis style BD, fond Silver, texte Deep Purple, bordure fine */}
       {currentNarrator && (
-        <div className="absolute left-[380px] right-[400px] top-[88px] z-20 flex items-center gap-3.5 rounded-full border border-deep/20 bg-silver/95 px-6 py-2.5 text-deep shadow-md backdrop-blur">
-          <BookOpen className="h-6 w-6 shrink-0 text-sec" />
-          <span className="text-[21px] font-bold leading-tight line-clamp-1">{currentNarrator}</span>
+        <div className="absolute left-1/2 -translate-x-1/2 top-[80px] z-20 flex h-[52px] w-[1240px] items-center justify-center gap-3.5 rounded-2xl border-2 border-deep/20 bg-silver/95 px-8 shadow-sm backdrop-blur">
+          <BookOpen className="h-5 w-5 shrink-0 text-sec" strokeWidth={2.2} />
+          <span className="text-[20px] font-bold text-deep leading-none text-center">
+            {currentNarrator.replace(/[𐀀-􏿿]|[☀-➿]/gu, "").trim()}
+          </span>
         </div>
       )}
 
       {/* Écran mural */}
-      <div className="absolute left-[550px] top-[156px] flex h-[310px] w-[820px] items-center justify-center rounded-[28px] border-[10px] border-deep bg-silver shadow-xl">
+      <div className="absolute left-1/2 -translate-x-1/2 top-[148px] flex h-[312px] w-[860px] items-center justify-center rounded-[28px] border-[10px] border-deep bg-silver shadow-xl">
         {frame.k === "cons" && cons?.visual === "truckBack" ? (
           <div className="flex items-center gap-6">
             <div className="anim-truck-back">
@@ -513,7 +523,7 @@ export function ScenarioScene({
           <Character id={extraSpeaker} size={220} speaking />
         </div>
       )}
-      {frame.k === "after" && sc.id === "s3" && (
+      {frame.k === "after" && sc.id === "s3" && frame.i === sc.after.length - 1 && (
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {Array.from({ length: 26 }).map((_, i) => (
             <span
