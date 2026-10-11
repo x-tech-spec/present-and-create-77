@@ -117,8 +117,10 @@ export function QuizHost() {
     const st = session.state;
 
     if (st === "lobby") {
-      // Démarrage du bus
+      // Démarrage du bus depuis la Mairie
       play("vroom");
+      setTravelFrom(0);
+      setTravelTo(QUIZ_QUESTIONS[0]!.buildingIndex);
       updateSessionState(pin, { state: "travel" });
       setTimeout(() => {
         updateSessionState(pin, {
@@ -128,7 +130,7 @@ export function QuizHost() {
           questionStartedAt: Date.now(),
           showAnswers: false,
         });
-      }, 1600);
+      }, 2200);
     } else if (st === "question") {
       // Affichage de la correction
       play("ding");
@@ -140,8 +142,11 @@ export function QuizHost() {
       // Prochaine question ou Podium
       if (currentQIndex < QUIZ_QUESTIONS.length - 1) {
         const nextIdx = currentQIndex + 1;
+        const currQ = QUIZ_QUESTIONS[currentQIndex]!;
         const nextQ = QUIZ_QUESTIONS[nextIdx]!;
         play("vroom");
+        setTravelFrom(currQ.buildingIndex);
+        setTravelTo(nextQ.buildingIndex);
         updateSessionState(pin, { state: "travel" });
         setTimeout(() => {
           updateSessionState(pin, {
@@ -151,14 +156,21 @@ export function QuizHost() {
             questionStartedAt: Date.now(),
             showAnswers: false,
           });
-        }, 1600);
+        }, 2200);
       } else {
-        // Arrivée au podium
-        play("fanfare");
-        updateSessionState(pin, { state: "podium", currentBuilding: "gare" });
+        // Arrivée au podium à la Gare (stop 4)
+        const currQ = QUIZ_QUESTIONS[currentQIndex]!;
+        play("vroom");
+        setTravelFrom(currQ.buildingIndex);
+        setTravelTo(4);
+        updateSessionState(pin, { state: "travel" });
+        setTimeout(() => {
+          play("fanfare");
+          updateSessionState(pin, { state: "podium", currentBuilding: "gare" });
+        }, 2200);
       }
     }
-  }, [session, pin, currentQIndex]);
+  }, [session, pin, currentQIndex, play]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -257,100 +269,117 @@ export function QuizHost() {
 
       {/* Contenu principal selon l'état du jeu */}
       <main className="relative flex-1 flex flex-col items-center justify-center p-8 overflow-hidden">
-        {/* ÉCRAN 1 : LOBBY */}
+        {/* ÉCRAN 1 : LOBBY AVEC VILLE 3D ET BUS */}
         {state === "lobby" && (
-          <div className="grid grid-cols-[1.1fr_0.9fr] gap-12 w-full max-w-7xl h-full items-center">
-            {/* Colonne gauche : Panneau QR code géant */}
-            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-deep/20 bg-silver/40 p-10 shadow-2xl text-center">
-              <span className="text-base font-bold text-deep/70 uppercase tracking-widest mb-3">
-                Scannez le QR Code ou ouvrez le lien
-              </span>
-              <div className="p-4 bg-white rounded-2xl border-4 border-deep shadow-inner my-2">
-                {qrUrl ? (
-                  <img src={qrUrl} alt="QR code pour rejoindre le quiz" className="h-72 w-72" />
-                ) : (
-                  <div className="h-72 w-72 flex items-center justify-center text-sm font-semibold">Génération du QR code...</div>
-                )}
-              </div>
-              <div className="mt-4 flex items-baseline gap-3">
-                <span className="text-xl font-bold">Code PIN :</span>
-                <span className="text-5xl font-black tracking-widest text-deep bg-silver px-6 py-1.5 rounded-2xl border-2 border-deep/30">
-                  {pin}
-                </span>
-              </div>
-              <p className="mt-4 text-sm font-semibold text-deep/60">
-                Lien direct : <span className="underline">{typeof window !== "undefined" ? window.location.host : ""}</span> (?mode=player)
-              </p>
+          <div className="relative w-full max-w-7xl h-full flex flex-col justify-between">
+            {/* Vue Ville 3D interactive */}
+            <div className="absolute inset-0 rounded-3xl overflow-hidden border-2 border-deep/20 shadow-2xl bg-paper">
+              <CityMap active={0} mode="browse" />
             </div>
 
-            {/* Colonne droite : Passagers qui montent dans le bus */}
-            <div className="flex flex-col h-full justify-between py-6">
-              <div>
-                <div className="flex items-center justify-between border-b border-deep/20 pb-4">
-                  <h2 className="text-2xl font-black">Salle d'attente du Bus</h2>
-                  <span className="text-sm font-bold bg-cosmic text-silver px-3 py-1 rounded-full">
-                    {playersList.length} connecté{playersList.length > 1 ? "s" : ""}
+            {/* Éléments HUD superposés sur la ville 3D */}
+            <div className="relative z-10 grid grid-cols-[380px_1fr_420px] gap-6 w-full h-full p-6 pointer-events-none items-center">
+              {/* Panneau gauche : QR Code & PIN */}
+              <div className="pointer-events-auto flex flex-col items-center justify-center rounded-3xl border-2 border-deep/20 bg-silver/90 backdrop-blur-md p-6 shadow-2xl text-center">
+                <span className="text-xs font-bold text-deep/70 uppercase tracking-widest mb-2">
+                  Scannez le QR Code ou ouvrez le lien
+                </span>
+                <div className="p-3 bg-white rounded-2xl border-2 border-deep shadow-inner my-1">
+                  {qrUrl ? (
+                    <img src={qrUrl} alt="QR code pour rejoindre le quiz" className="h-56 w-56" />
+                  ) : (
+                    <div className="h-56 w-56 flex items-center justify-center text-xs font-semibold">Génération du QR code...</div>
+                  )}
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="text-base font-bold text-deep">Code PIN :</span>
+                  <span className="text-4xl font-black tracking-widest text-deep bg-silver px-5 py-1 rounded-xl border border-deep/30">
+                    {pin}
                   </span>
                 </div>
+                <p className="mt-3 text-xs font-semibold text-deep/60">
+                  Lien direct : <span className="underline">{typeof window !== "undefined" ? window.location.host : ""}</span> (?mode=player)
+                </p>
+              </div>
 
-                <div className="mt-6 flex flex-wrap gap-3 max-h-[360px] overflow-y-auto p-2">
-                  {playersList.length === 0 ? (
-                    <div className="w-full py-16 text-center text-deep/60 font-semibold italic">
-                      En attente des premiers passagers... Scannez le QR code ci-contre pour monter à bord.
-                    </div>
-                  ) : (
-                    playersList.map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex items-center gap-3 rounded-2xl border border-deep/20 bg-silver/90 px-4 py-2.5 shadow-sm"
-                      >
-                        <QuizAvatar id={p.avatar} size={42} />
-                        <span className="text-base font-bold text-deep">{p.name}</span>
-                      </div>
-                    ))
-                  )}
+              {/* Centre : Ville 3D avec badge Bus Mairie */}
+              <div className="flex flex-col items-center justify-start h-full pt-4">
+                <div className="pointer-events-auto inline-flex items-center gap-3 rounded-full border border-deep/20 bg-silver/95 px-6 py-2.5 shadow-xl backdrop-blur-md">
+                  <Truck className="h-6 w-6 text-cosmic" />
+                  <span className="text-sm font-black text-deep">Départ : Mairie de la Ville-Entreprise</span>
                 </div>
               </div>
 
-              {/* Bouton pour lancer */}
-              <div className="mt-6 flex flex-col gap-2">
-                <button
-                  onClick={handleNextStep}
-                  className="w-full flex items-center justify-center gap-4 rounded-2xl bg-deep py-5 px-8 text-2xl font-black text-silver shadow-xl hover:bg-deep-dark transition cursor-pointer"
-                >
-                  Faire démarrer le Bus <ArrowRight className="h-7 w-7" />
-                </button>
-                <div className="text-center text-xs font-bold text-deep/60">
-                  Astuce : Appuyez sur la touche <kbd className="px-2 py-0.5 bg-silver border border-deep/20 rounded">ESPACE</kbd> pour démarrer
+              {/* Panneau droite : Passagers & Démarrage */}
+              <div className="pointer-events-auto flex flex-col h-[520px] justify-between rounded-3xl border-2 border-deep/20 bg-silver/90 backdrop-blur-md p-6 shadow-2xl">
+                <div>
+                  <div className="flex items-center justify-between border-b border-deep/20 pb-3">
+                    <h2 className="text-xl font-black">Passagers à bord</h2>
+                    <span className="text-xs font-bold bg-cosmic text-silver px-3 py-1 rounded-full">
+                      {playersList.length} connecté{playersList.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-1">
+                    {playersList.length === 0 ? (
+                      <div className="w-full py-12 text-center text-deep/60 font-semibold text-sm italic">
+                        En attente des étudiants... Scannez le QR code pour monter dans le Bus.
+                      </div>
+                    ) : (
+                      playersList.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-2.5 rounded-xl border border-deep/20 bg-silver px-3 py-1.5 shadow-sm"
+                        >
+                          <QuizAvatar id={p.avatar} size={32} />
+                          <span className="text-sm font-bold text-deep">{p.name}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Bouton pour démarrer */}
+                <div className="mt-4 flex flex-col gap-2">
+                  <button
+                    onClick={handleNextStep}
+                    className="w-full flex items-center justify-center gap-3 rounded-2xl bg-deep py-4 px-6 text-xl font-black text-silver shadow-xl hover:bg-deep-dark transition cursor-pointer"
+                  >
+                    Faire démarrer le Bus <ArrowRight className="h-6 w-6" />
+                  </button>
+                  <div className="text-center text-xs font-bold text-deep/60">
+                    Appuyez sur <kbd className="px-1.5 py-0.5 bg-silver border border-deep/20 rounded font-mono">ESPACE</kbd> pour lancer
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ÉCRAN 2 : TRAJET DU BUS */}
+        {/* ÉCRAN 2 : DÉPLACEMENT 3D DU BUS SUR LA VILLE */}
         {state === "travel" && (
-          <div className="flex flex-col items-center justify-center text-center animate-fade-in">
-            <div className="relative w-80 h-36 flex items-center justify-center">
-              {/* Bus cosmique stylisé */}
-              <svg viewBox="0 0 200 90" className="w-80 h-36">
-                <rect x="20" y="20" width="160" height="50" rx="10" className="fill-deep stroke-deep" strokeWidth="2" />
-                {/* Ligne Lavender */}
-                <rect x="20" y="44" width="160" height="8" className="fill-lavender" />
-                {/* Vitres Silver */}
-                <rect x="35" y="26" width="25" height="14" rx="3" className="fill-silver" />
-                <rect x="68" y="26" width="25" height="14" rx="3" className="fill-silver" />
-                <rect x="101" y="26" width="25" height="14" rx="3" className="fill-silver" />
-                <rect x="134" y="26" width="35" height="14" rx="3" className="fill-silver" />
-                {/* Roues */}
-                <circle cx="55" cy="70" r="14" className="fill-deep stroke-silver" strokeWidth="4" />
-                <circle cx="145" cy="70" r="14" className="fill-deep stroke-silver" strokeWidth="4" />
-              </svg>
+          <div className="relative w-full max-w-7xl h-full flex flex-col items-center justify-center">
+            {/* Ville 3D avec déplacement en direct du bus */}
+            <div className="w-full h-full rounded-3xl overflow-hidden border-2 border-deep/20 shadow-2xl bg-paper">
+              <CityMap
+                active={travelTo}
+                from={travelFrom}
+                mode="travel"
+              />
             </div>
-            <h2 className="text-3xl font-black mt-6 tracking-tight">Le Bus roule dans la Ville-Entreprise…</h2>
-            <p className="text-lg font-bold text-deep/70 mt-2">
-              Prochain arrêt : <span className="text-cosmic">{currentQ?.buildingLabel}</span>
-            </p>
+
+            {/* Bannière supérieure de trajet */}
+            <div className="absolute top-6 z-20 flex items-center gap-4 rounded-full border-2 border-deep/20 bg-silver/95 px-8 py-3.5 shadow-2xl backdrop-blur-md">
+              <Truck className="h-7 w-7 text-cosmic animate-pulse" />
+              <div className="flex flex-col">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-deep/60">
+                  Déplacement du Bus dans la Ville-Entreprise
+                </span>
+                <span className="text-xl font-black text-deep">
+                  {travelTo === 4 ? "En route vers la Gare (Podium final)..." : `Arrêt suivant : ${QUIZ_QUESTIONS.find((q) => q.buildingIndex === travelTo)?.buildingLabel || "Prochain Bâtiment"}`}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

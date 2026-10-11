@@ -13,13 +13,19 @@ import type { AvatarId } from "./QuizAvatars";
 
 export type SessionState = "lobby" | "travel" | "question" | "correction" | "intermediate_rank" | "podium";
 
+export type PlayerAnswer = {
+  choice: "A" | "B" | "C" | "D";
+  timeMs: number;
+  points: number;
+};
+
 export type PlayerData = {
   id: string;
   name: string;
   avatar: AvatarId;
   score: number;
   connected: boolean;
-  answers?: Record<string, { choice: "A" | "B" | "C" | "D"; timeMs: number; points: number }>;
+  answers?: Record<string, PlayerAnswer>;
 };
 
 export type SessionData = {
@@ -33,7 +39,7 @@ export type SessionData = {
   players: Record<string, PlayerData>;
 };
 
-// Configuration Firebase (fournie par variable d'environnement ou fallback)
+// Configuration Firebase via variables d'environnement (avec fallback démo)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD-LinaCosmeticsQuizDemoKey",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "lina-cosmetiques-quiz.firebaseapp.com",
@@ -48,8 +54,18 @@ let app: FirebaseApp | null = null;
 let db: Database | null = null;
 let isFirebaseAvailable = false;
 
+// Détection d'environnement Firebase valide
+const isConfiguredEnv = Boolean(
+  import.meta.env.VITE_FIREBASE_API_KEY &&
+  import.meta.env.VITE_FIREBASE_API_KEY !== "AIzaSyD-LinaCosmeticsQuizDemoKey" &&
+  import.meta.env.VITE_FIREBASE_DATABASE_URL &&
+  !import.meta.env.VITE_FIREBASE_DATABASE_URL.includes("lina-cosmetiques-quiz-default-rtdb")
+);
+
+const isTestEnv = typeof process !== "undefined" && (process.env?.NODE_ENV === "test" || import.meta.env?.MODE === "test");
+
 try {
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && isConfiguredEnv && !isTestEnv) {
     app = getApps().length > 0 ? getApps()[0]! : initializeApp(firebaseConfig);
     db = getDatabase(app);
     isFirebaseAvailable = true;
@@ -58,11 +74,41 @@ try {
   isFirebaseAvailable = false;
 }
 
-// Canal local BroadcastChannel pour synchronisation immédiate inter-onglets ou offline
+export function setFirebaseAvailableForTesting(available: boolean) {
+  isFirebaseAvailable = available;
+}
+
+// Canal local BroadcastChannel pour synchronisation inter-onglets ou fallback sans latence
 const broadcast = typeof window !== "undefined" && "BroadcastChannel" in window ? new BroadcastChannel("lina_bus_quiz") : null;
 
-// Mémoire locale de session pour fonctionnement hors-ligne ou réseau dégradé
+// Cache mémoire local
 const localSessions: Record<string, SessionData> = {};
+
+// Gestion des listeners de connexion
+const connectionListeners = new Set<(online: boolean) => void>();
+let networkOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    networkOnline = true;
+    connectionListeners.forEach((cb) => cb(true));
+    flushPendingOfflineQueue();
+  });
+
+  window.addEventListener("offline", () => {
+    networkOnline = false;
+    connectionListeners.forEach((cb) => cb(false));
+  });
+}
+
+export function isOnline(): boolean {
+  return typeof navigator !== "undefined" ? navigator.onLine : networkOnline;
+}
+
+export function onNetworkStatusChange(callback: (online: boolean) => void): () => void {
+  connectionListeners.add(callback);
+  return () => connectionListeners.delete(callback);
+}
 
 function notifyLocal(pin: string, data: SessionData) {
   localSessions[pin] = data;
@@ -70,6 +116,62 @@ function notifyLocal(pin: string, data: SessionData) {
     localStorage.setItem(`lina_quiz_session_${pin}`, JSON.stringify(data));
   } catch {}
   broadcast?.postMessage({ type: "session_update", pin, data });
+}
+
+export function getLocalSession(pin: string): SessionData | null {
+  if (localSessions[pin]) return localSessions[pin]!;
+  try {
+    const raw = localStorage.getItem(`lina_quiz_session_${pin}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      localSessions[pin] = parsed;
+      return parsed;
+    }
+  } catch {}
+  return null;
+}
+
+// File d'attente pour synchronisation après reconnexion
+type PendingSubmission = {
+  pin: string;
+  playerId: string;
+  questionId: number;
+  choice: "A" | "B" | "C" | "D";
+  timeMs: number;
+  points: number;
+};
+
+function queueOfflineSubmission(sub: PendingSubmission) {
+  try {
+    const key = `lina_quiz_offline_queue_${sub.pin}`;
+    const raw = localStorage.getItem(key);
+    const list: PendingSubmission[] = raw ? JSON.parse(raw) : [];
+    list.push(sub);
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch {}
+}
+
+async function flushPendingOfflineQueue() {
+  if (!isFirebaseAvailable || !db) return;
+  try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith("lina_quiz_offline_queue_"));
+    for (const k of keys) {
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const list: PendingSubmission[] = JSON.parse(raw);
+      for (const item of list) {
+        try {
+          const answerRef = ref(db, `sessions/${item.pin}/players/${item.playerId}/answers/q${item.questionId}`);
+          await set(answerRef, { choice: item.choice, timeMs: item.timeMs, points: item.points });
+          const scoreRef = ref(db, `sessions/${item.pin}/players/${item.playerId}/score`);
+          const session = getLocalSession(item.pin);
+          const currentScore = session?.players?.[item.playerId]?.score || 0;
+          await set(scoreRef, currentScore);
+        } catch {}
+      }
+      localStorage.removeItem(k);
+    }
+  } catch {}
 }
 
 export function createSession(pin: string): SessionData {
@@ -86,7 +188,7 @@ export function createSession(pin: string): SessionData {
 
   notifyLocal(pin, initial);
 
-  if (isFirebaseAvailable && db) {
+  if (isFirebaseAvailable && db && isOnline()) {
     try {
       const sessionRef = ref(db, `sessions/${pin}`);
       set(sessionRef, initial).catch(() => {});
@@ -111,13 +213,11 @@ export function subscribeToSession(pin: string, onUpdate: (data: SessionData | n
             notifyLocal(pin, val);
             onUpdate(val);
           } else {
-            // Regarder en cache local
             const local = getLocalSession(pin);
             onUpdate(local);
           }
         },
         () => {
-          // Erreur réseau : repli sur le cache local
           const local = getLocalSession(pin);
           onUpdate(local);
         }
@@ -145,19 +245,6 @@ export function subscribeToSession(pin: string, onUpdate: (data: SessionData | n
   };
 }
 
-export function getLocalSession(pin: string): SessionData | null {
-  if (localSessions[pin]) return localSessions[pin]!;
-  try {
-    const raw = localStorage.getItem(`lina_quiz_session_${pin}`);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      localSessions[pin] = parsed;
-      return parsed;
-    }
-  } catch {}
-  return null;
-}
-
 export async function updateSessionState(pin: string, patch: Partial<SessionData>): Promise<void> {
   const current = getLocalSession(pin) || {
     pin,
@@ -173,7 +260,7 @@ export async function updateSessionState(pin: string, patch: Partial<SessionData
   const updated: SessionData = { ...current, ...patch };
   notifyLocal(pin, updated);
 
-  if (isFirebaseAvailable && db) {
+  if (isFirebaseAvailable && db && isOnline()) {
     try {
       const sessionRef = ref(db, `sessions/${pin}`);
       await update(sessionRef, patch);
@@ -184,7 +271,7 @@ export async function updateSessionState(pin: string, patch: Partial<SessionData
 export async function registerPlayer(pin: string, player: PlayerData): Promise<boolean> {
   let session = getLocalSession(pin);
 
-  if (isFirebaseAvailable && db) {
+  if (isFirebaseAvailable && db && isOnline()) {
     try {
       const sessionRef = ref(db, `sessions/${pin}`);
       const snap = await get(sessionRef);
@@ -195,7 +282,6 @@ export async function registerPlayer(pin: string, player: PlayerData): Promise<b
   }
 
   if (!session) {
-    // Si la session n'existe pas encore, on l'initialise
     session = createSession(pin);
   }
 
@@ -203,7 +289,7 @@ export async function registerPlayer(pin: string, player: PlayerData): Promise<b
   session.players[player.id] = player;
   notifyLocal(pin, session);
 
-  if (isFirebaseAvailable && db) {
+  if (isFirebaseAvailable && db && isOnline()) {
     try {
       const playerRef = ref(db, `sessions/${pin}/players/${player.id}`);
       await set(playerRef, player);
@@ -230,6 +316,12 @@ export async function submitPlayerAnswer(
     notifyLocal(pin, session);
   }
 
+  if (!isOnline()) {
+    // Si déconnecté, mise en file d'attente pour envoi à la reconnexion
+    queueOfflineSubmission({ pin, playerId, questionId, choice, timeMs, points });
+    return;
+  }
+
   if (isFirebaseAvailable && db) {
     try {
       const answerRef = ref(db, `sessions/${pin}/players/${playerId}/answers/q${questionId}`);
@@ -237,6 +329,32 @@ export async function submitPlayerAnswer(
       const scoreRef = ref(db, `sessions/${pin}/players/${playerId}/score`);
       const newScore = (session?.players?.[playerId]?.score || 0);
       await set(scoreRef, newScore);
+    } catch {
+      queueOfflineSubmission({ pin, playerId, questionId, choice, timeMs, points });
+    }
+  }
+}
+
+/** Reconnexion d'un joueur après coupure réseau */
+export async function reconnectPlayer(pin: string, playerId: string): Promise<PlayerData | null> {
+  if (isFirebaseAvailable && db && isOnline()) {
+    try {
+      const playerRef = ref(db, `sessions/${pin}/players/${playerId}`);
+      const snap = await get(playerRef);
+      if (snap.exists()) {
+        const p = snap.val() as PlayerData;
+        p.connected = true;
+        await update(playerRef, { connected: true });
+        return p;
+      }
     } catch {}
   }
+
+  const session = getLocalSession(pin);
+  if (session?.players?.[playerId]) {
+    session.players[playerId]!.connected = true;
+    notifyLocal(pin, session);
+    return session.players[playerId]!;
+  }
+  return null;
 }

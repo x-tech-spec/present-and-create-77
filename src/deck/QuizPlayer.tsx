@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Users,
+  Wifi,
+  WifiOff,
   CheckCircle2,
   XCircle,
   Trophy,
@@ -19,6 +21,9 @@ import {
   subscribeToSession,
   registerPlayer,
   submitPlayerAnswer,
+  isOnline,
+  onNetworkStatusChange,
+  reconnectPlayer,
   type SessionData,
   type PlayerData,
 } from "./firebaseQuiz";
@@ -77,6 +82,16 @@ export function QuizPlayer() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [selectedOption, setSelectedOption] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [soundActive, setSoundActive] = useState(isSoundOn());
+  const [online, setOnline] = useState(isOnline());
+
+  useEffect(() => {
+    return onNetworkStatusChange((status) => {
+      setOnline(status);
+      if (status && pinInput && playerId) {
+        reconnectPlayer(pinInput, playerId);
+      }
+    });
+  }, [pinInput, playerId]);
 
   // Inscription / abonnement à la session
   useEffect(() => {
@@ -288,6 +303,14 @@ export function QuizPlayer() {
           </span>
         </div>
       </header>
+
+      {/* Bannière d'état réseau et reconnexion */}
+      {!online && (
+        <div className="w-full max-w-xl mx-auto my-2 rounded-2xl bg-deep text-silver p-3 text-xs font-bold flex items-center justify-center gap-3 border border-deep shadow-md animate-pulse">
+          <WifiOff className="h-4 w-4 text-silver" />
+          <span>Connexion réseau interrompue — Réponses conservées en cache local et synchronisées dès reconnexion.</span>
+        </div>
+      )}
 
       {/* Contenu principal selon l'état de la session */}
       <main className="w-full max-w-xl mx-auto my-auto flex-1 flex flex-col justify-center py-6">

@@ -1,0 +1,63 @@
+{
+  "rules": {
+    "sessions": {
+      "$pin": {
+        ".read": true,
+        ".write": "!data.exists() || newData.child('pin').val() == $pin",
+        "pin": {
+          ".validate": "newData.isString() && newData.val() == $pin"
+        },
+        "state": {
+          ".validate": "newData.isString() && (newData.val() == 'lobby' || newData.val() == 'travel' || newData.val() == 'question' || newData.val() == 'correction' || newData.val() == 'intermediate_rank' || newData.val() == 'podium')"
+        },
+        "currentBuilding": {
+          ".validate": "newData.isString() && (newData.val() == 'mairie' || newData.val() == 'marketing' || newData.val() == 'rh' || newData.val() == 'place' || newData.val() == 'stade' || newData.val() == 'gare')"
+        },
+        "currentQuestionIndex": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 7"
+        },
+        "questionStartedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "showAnswers": {
+          ".validate": "newData.isBoolean()"
+        },
+        "players": {
+          "$playerId": {
+            ".read": true,
+            ".write": "!data.exists() || data.child('id').val() == $playerId || newData.child('id').val() == $playerId",
+            "id": {
+              ".validate": "newData.isString() && newData.val() == $playerId"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 30"
+            },
+            "avatar": {
+              ".validate": "newData.isString() && (newData.val() == 'girl_long' || newData.val() == 'girl_tied' || newData.val() == 'boy_glasses' || newData.val() == 'boy_normal')"
+            },
+            "score": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "connected": {
+              ".validate": "newData.isBoolean()"
+            },
+            "answers": {
+              "$questionKey": {
+                ".write": "!data.exists() || data.parent().child('id').val() == $playerId",
+                "choice": {
+                  ".validate": "newData.isString() && (newData.val() == 'A' || newData.val() == 'B' || newData.val() == 'C' || newData.val() == 'D')"
+                },
+                "timeMs": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0"
+                },
+                "points": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 150"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -495,61 +495,38 @@ export const SECTIONS: SectionDef[] = [
       {
         id: "3.1", title: "Place au Quiz !", steps: 1,
         render: (_s, ctx) => (
-          <SlideFrame fn="neutral" kicker="Quiz" title="Place au Quiz !" id="3.1">
-            <div className="grid h-full grid-cols-[1.1fr_0.9fr] gap-12 items-center">
-              <div className="card-3d flex flex-col items-center justify-center gap-6 bg-deep p-10 text-silver">
-                <span className="slide-kicker text-lavender">Le Bus Quizz · Vidéoprojecteur & Smartphones</span>
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-silver text-deep shadow-lg">
-                    <Truck className="h-14 w-14" />
-                  </div>
-                  <div className="slide-title-sm text-silver font-black">
-                    Visite de la Ville Bâtiment par Bâtiment
-                  </div>
-                  <p className="slide-body text-silver/80 max-w-md">
-                    7 questions individuelles : Mairie, Marketing, RH, Place et Stade. Synchronisation temps réel ou projection.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
-                  <a
-                    href="?mode=host"
-                    onClick={(e) => { e.stopPropagation(); window.location.href = "?mode=host"; }}
-                    className="slide-body inline-flex items-center gap-3 rounded-full bg-lavender px-8 py-4 font-black text-deep shadow-xl transition hover:-translate-y-1 cursor-pointer"
-                  >
-                    Lancer l'écran Host (Vidéoprojecteur) <ArrowRight className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="?mode=player"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="slide-body inline-flex items-center gap-3 rounded-full border border-silver/40 bg-deep px-6 py-4 font-bold text-silver transition hover:bg-deep-dark"
-                  >
-                    Tester l'écran Player (Mobile)
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center gap-6">
-                {[
-                  "Lancez l'écran Host sur le vidéoprojecteur (Plein écran : touche F).",
-                  "Les étudiants scannent le QR code affiché à l'écran.",
-                  "Chaque étudiant saisit son pseudo et sa silhouette.",
-                  "Le bus démarre avec ESPACE : questions interactives et podium à la Gare !"
-                ].map((t, i) => (
-                  <div key={t} className="flex items-center gap-5">
-                    <span className="slide-body flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cosmic font-black text-silver">{i + 1}</span>
-                    <span className="slide-body font-semibold">{t}</span>
-                  </div>
-                ))}
-
-                <button
-                  onClick={(e) => { e.stopPropagation(); ctx.goTo(4, 0); }}
-                  className="slide-body mt-4 inline-flex w-fit items-center gap-3 rounded-full bg-silver border border-deep/20 px-8 py-4 font-bold text-deep transition hover:-translate-y-1 cursor-pointer"
+          <SlideFrame fn="neutral" kicker="Quiz interactif" title="Place au Quiz !" id="3.1">
+            <div className="flex h-full flex-col items-center justify-center gap-10">
+              <div className="flex flex-wrap items-center justify-center gap-8">
+                <a
+                  href="?mode=host"
+                  onClick={(e) => { e.stopPropagation(); window.location.href = "?mode=host"; }}
+                  className="flex items-center gap-4 rounded-3xl bg-deep px-10 py-7 text-2xl font-black text-silver shadow-2xl transition hover:-translate-y-1 hover:shadow-deep/30 cursor-pointer"
                 >
-                  Passer directement à la conclusion <ArrowRight className="h-6 w-6" />
-                </button>
+                  <Building2 className="h-8 w-8 text-lavender" />
+                  Lancer l'écran Host
+                  <ArrowRight className="h-7 w-7 text-silver" />
+                </a>
+
+                <a
+                  href="?mode=player"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-4 rounded-3xl border-2 border-deep/20 bg-silver px-10 py-7 text-2xl font-black text-deep shadow-2xl transition hover:-translate-y-1 cursor-pointer"
+                >
+                  <Users className="h-8 w-8 text-cosmic" />
+                  Lancer l'écran Player
+                  <ArrowRight className="h-7 w-7 text-deep" />
+                </a>
               </div>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); ctx.goTo(4, 0); }}
+                className="inline-flex items-center gap-3 rounded-full border border-deep/20 bg-paper/80 px-8 py-3.5 text-base font-bold text-deep/70 transition hover:bg-silver hover:text-deep cursor-pointer"
+              >
+                Passer directement à la conclusion <ArrowRight className="h-5 w-5" />
+              </button>
             </div>
           </SlideFrame>
         ),
