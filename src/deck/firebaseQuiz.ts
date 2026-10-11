@@ -188,7 +188,7 @@ export async function updateSessionState(pin: string, patch: Partial<SessionData
   const current = getLocalSession(pin) || { pin, createdAt: Date.now(), state: "lobby" as const, currentBuilding: "mairie" as const, currentBuildingIndex: 0, previousBuildingIndex: 0, currentQuestionIndex: 0, questionStartedAt: Date.now(), showAnswers: false, players: {} };
   let hostToken = patch.hostToken || current.hostToken;
   if (!hostToken && typeof sessionStorage !== "undefined") hostToken = sessionStorage.getItem(`lina_quiz_host_token_${pin}`) || undefined;
-  const updated: SessionData = { ...current, ...patch, hostToken, players: patch.players !== undefined ? patch.players : current.players || {} };
+  const updated: SessionData = { ...current, ...patch, ...(hostToken ? { hostToken } : {}), players: patch.players !== undefined ? patch.players : current.players || {} } as SessionData;
   notifyLocal(pin, updated);
   if (isFirebaseAvailable && db && isOnline()) {
     const fbPatch: Record<string, any> = { ...patch };
